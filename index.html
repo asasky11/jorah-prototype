@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>جرعة — عرض المشروع</title>
+<link rel="icon" href="assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#0E3A5A;--success:#2D8A6B;--alert:#D9534F;--warning:#D99B26;--appt:#3B6E9E;--bg:#F7F9FA;--card:#fff;--text:#0E3A5A;--text2:#5B6B78;--sep:#E2E8F0}
+@media (prefers-color-scheme:dark){:root{--bg:#121B22;--card:#1A2228;--text:#fff;--text2:#94A3B8;--sep:#1E293B}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header{padding:18px 0;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:20px}
+.logo img{width:40px;height:40px;border-radius:11px}
+.tag{font-size:11px;color:var(--warning);border:1px solid var(--warning);border-radius:6px;padding:1px 8px}
+.cta{background:var(--success);color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:14px;display:inline-flex;gap:8px;align-items:center}
+.cta.sec{background:transparent;color:var(--text);border:1px solid var(--sep)}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:50px 0 40px}
+.hero h1{font-size:44px;font-weight:900;line-height:1.3}
+.hero h1 span{color:var(--success)}
+.hero p{font-size:18px;color:var(--text2);margin:18px 0 26px}
+.hero .acts{display:flex;gap:12px;flex-wrap:wrap}
+.frame{border-radius:30px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.25);border:1px solid var(--sep);background:#0A0F14;aspect-ratio:390/700;position:relative}
+.frame iframe{width:390px;height:844px;border:0;transform-origin:top right;position:absolute;top:0;right:0}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:10px 0 50px}
+.kpi{background:var(--card);border:1px solid var(--sep);border-radius:18px;padding:18px;text-align:center}
+.kpi b{display:block;font-size:30px;font-weight:900;color:var(--primary)}
+@media (prefers-color-scheme:dark){.kpi b{color:#8CC4E8}}
+.kpi small{color:var(--text2)}
+section{padding:30px 0}
+h2{font-size:30px;font-weight:900;margin-bottom:8px}
+.lead{color:var(--text2);font-size:16px;margin-bottom:24px;max-width:720px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:var(--card);border:1px solid var(--sep);border-radius:20px;padding:22px}
+.card .ic{font-size:30px;margin-bottom:8px}
+.card h3{font-size:17px;font-weight:800;margin-bottom:6px}
+.card p{color:var(--text2);font-size:14px}
+.problem{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.problem .card{border-right:4px solid var(--alert)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;counter-reset:s}
+.step{background:var(--card);border:1px solid var(--sep);border-radius:18px;padding:18px;position:relative}
+.step::before{counter-increment:s;content:counter(s,arabic-indic);position:absolute;top:-14px;right:16px;width:30px;height:30px;border-radius:50%;background:var(--success);color:#fff;display:grid;place-items:center;font-weight:800}
+.step h3{font-size:15px;font-weight:800;margin:6px 0 4px}
+.step p{font-size:13.5px;color:var(--text2)}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.plan{background:var(--card);border:1px solid var(--sep);border-radius:22px;padding:24px}
+.plan.hi{border:2px solid var(--success);position:relative}
+.plan.hi::after{content:'الأكثر طلباً';position:absolute;top:-13px;right:20px;background:var(--success);color:#fff;font-size:12px;padding:2px 12px;border-radius:8px;font-weight:700}
+.plan .price{font-size:32px;font-weight:900;margin:6px 0}
+.plan .price small{font-size:14px;color:var(--text2);font-weight:400}
+.plan ul{list-style:none;margin-top:12px}
+.plan li{padding:6px 0;font-size:14px;color:var(--text2)}
+.plan li::before{content:'✓ ';color:var(--success);font-weight:800}
+.tech{display:flex;gap:10px;flex-wrap:wrap}
+.tech span{background:var(--card);border:1px solid var(--sep);border-radius:10px;padding:6px 14px;font-size:13.5px;font-weight:600}
+.road{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.road .card h3{color:var(--success)}
+.road .card.now h3{color:var(--warning)}
+.ask{background:linear-gradient(135deg,var(--primary),#1B5A80);color:#fff;border-radius:28px;padding:40px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;margin:30px 0 50px}
+.ask h2{color:#fff}
+.ask p{opacity:.85}
+.ask .cta{background:#fff;color:var(--primary)}
+footer{padding:20px 0 40px;color:var(--text2);font-size:13px;border-top:1px solid var(--sep)}
+.note{font-size:12px;color:var(--text2);background:var(--card);border:1px dashed var(--sep);border-radius:12px;padding:10px 14px;margin-top:14px}
+@media (max-width:900px){.hero,.kpis,.cards,.problem,.steps,.plans,.road,.ask{grid-template-columns:1fr}.hero h1{font-size:32px}.frame{max-width:390px;margin:0 auto;width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="logo"><img src="assets/icon.png" alt="">جرعة <span class="tag">عرض المشروع</span></div>
+  <a class="cta" href="demo/index.html">▶ جرّب النموذج التفاعلي</a>
+</header>
+
+<section class="hero">
+  <div>
+    <h1>كل جرعة في وقتها،<br>و<span>أهلك مطمئنون</span> أينما كانوا</h1>
+    <p>«جرعة» تطبيق عربي للتذكير بالأدوية والمواعيد الطبية، يقرأ رسائل «موعدي» و«وصفتي» تلقائياً، ويربط المريض المسنّ بأبنائه عبر وضع رعاية مخصّص لمرضى الزهايمر.</p>
+    <div class="acts"><a class="cta" href="demo/index.html">▶ النموذج التفاعلي</a><a class="cta sec" href="DEMO_SCRIPT.md">سيناريو العرض</a></div>
+    <div class="note">النموذج يعمل في المتصفح دون تثبيت. البيانات وهمية ولا تُحفظ. متوفر فعلياً على iOS وأندرويد وApple Watch.</div>
+  </div>
+  <div class="frame"><iframe id="pf" src="demo/index.html" title="نموذج التطبيق" loading="lazy"></iframe></div>
+</section>
+
+<div class="kpis">
+  <div class="kpi"><b>٣</b><small>منصات تعمل الآن: iOS · Android · Watch</small></div>
+  <div class="kpi"><b>١٥+</b><small>شاشة مكتملة في ٥ تدفقات</small></div>
+  <div class="kpi"><b>١٠٠٪</b><small>عربي بالاتجاه الصحيح وخط Cairo</small></div>
+  <div class="kpi"><b>٠</b><small>بيانات تغادر الجهاز في وضع الذكاء</small></div>
+</div>
+
+<section>
+  <h2>المشكلة</h2>
+  <p class="lead">المرضى المزمنون وكبار السن يفوّتون الجرعات، وأهلهم لا يعرفون إلا بعد المضاعفات.</p>
+  <div class="problem">
+    <div class="card"><div class="ic">💊</div><h3>نصف المرضى لا يلتزمون</h3><p>نسبة الالتزام بالأدوية المزمنة لا تتجاوز ٥٠٪ عالمياً، وتنخفض أكثر مع تعدد الأدوية وتقدم العمر.</p></div>
+    <div class="card"><div class="ic">📱</div><h3>تطبيقات لا تفهم السوق</h3><p>التطبيقات الحالية مترجمة، لا تقرأ رسائل المواعيد الرسمية، ولا تدعم الاتجاه العربي أو التقويم الهجري.</p></div>
+    <div class="card"><div class="ic">👵</div><h3>المريض المسنّ وحده</h3><p>ابن يعمل في مدينة أخرى، وأم تعيش مع الزهايمر: لا طريقة لمعرفة أن الجرعة أُخذت أو أنها خرجت من البيت.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>الحل</h2>
+  <p class="lead">تطبيق واحد يربط ثلاثة أطراف: المريض، وأهله، وبياناته الصحية من الساعة والمستشفى.</p>
+  <div class="cards">
+    <div class="card"><div class="ic">⏰</div><h3>تذكير ذكي بالعربية</h3><p>جدولة الأدوية مع تنبيه منطوق، تأجيل بلمسة، خصم تلقائي من المخزون، وتذكير بإعادة التعبئة.</p></div>
+    <div class="card"><div class="ic">✉️</div><h3>قراءة رسائل موعدي ووصفتي</h3><p>الرسالة الرسمية تتحول تلقائياً إلى موعد في التقويم أو دواء في الجدول، على الجهاز دون رفع للسحابة.</p></div>
+    <div class="card"><div class="ic">👨‍👩‍👧</div><h3>شركاء الرعاية</h3><p>دعوة الأقارب برمز QR، صلاحيات محددة، سجل لحظي للجرعات، وتنبيه فوري عند التأخر.</p></div>
+    <div class="card"><div class="ic">🧠</div><h3>وضع رعاية الزهايمر</h3><p>واجهة فاتحة مكبّرة بزر واحد للمريض، ونطاق آمن جغرافي ينبّه الأهل مع الموقع ونسبة البطارية.</p></div>
+    <div class="card"><div class="ic">⌚</div><h3>الصحة والساعة الذكية</h3><p>النبض والأكسجين وتخطيط القلب والنوم من Apple Watch وHealth Connect، وتطبيق مستقل على الساعة.</p></div>
+    <div class="card"><div class="ic">✨</div><h3>مساعد ذكي على الجهاز</h3><p>يكتشف أنماط التأخر ونقص المخزون ويقترح تعديلات، ويكيّف الواجهة تلقائياً لكبار السن.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>كيف يعمل</h2>
+  <div class="steps">
+    <div class="step"><h3>يسجّل المريض أدويته</h3><p>يدوياً بمنتقي شكل الحبة، أو من رسالة وصفتي، أو من كتالوج الأدوية الذكي.</p></div>
+    <div class="step"><h3>يصل التذكير في وقته</h3><p>على الهاتف والساعة، منطوقاً بالعربية، مع زر «تم» وزر «تأجيل».</p></div>
+    <div class="step"><h3>يرى الأهل ما يحدث</h3><p>سجل رعاية لحظي، وتنبيه إن تأخرت الجرعة أو خرج المريض من النطاق الآمن.</p></div>
+    <div class="step"><h3>يتعلّم التطبيق</h3><p>يقترح تعديل الأوقات، يذكّر بالتعبئة، ويرفع تقريراً للطبيب في المراجعة.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>نموذج العمل</h2>
+  <p class="lead">المريض يستخدم مجاناً. من يدفع هو الابن المطمئن.</p>
+  <div class="plans">
+    <div class="plan"><h3>فردي</h3><div class="price">مجاني</div><ul><li>تذكير الأدوية والمواعيد</li><li>قراءة رسائل موعدي ووصفتي</li><li>التقويم والمخزون</li><li>شريك رعاية واحد</li></ul></div>
+    <div class="plan hi"><h3>عائلي</h3><div class="price">١٩ <small>ر.س / شهرياً</small></div><ul><li>حتى ٥ شركاء رعاية</li><li>وضع الزهايمر والنطاق الآمن</li><li>التتبع المباشر وجرس الإنذار</li><li>مزامنة الساعة والتقارير</li></ul></div>
+    <div class="plan"><h3>مؤسسي</h3><div class="price">حسب الاتفاق</div><ul><li>دور الرعاية ومراكز المسنين</li><li>لوحة متابعة للممرضين</li><li>تكامل مع أنظمة المستشفى</li><li>دعم وتدريب</li></ul></div>
+  </div>
+</section>
+
+<section>
+  <h2>ما تم بناؤه فعلاً</h2>
+  <p class="lead">هذا ليس عرضاً لفكرة. التطبيق مبني ويعمل على ثلاث منصات بقاعدة بيانات واحدة.</p>
+  <div class="tech"><span>SwiftUI · iOS</span><span>watchOS · Apple Watch</span><span>React Native / Expo · Android</span><span>Firebase Auth + Firestore</span><span>Apple HealthKit</span><span>Health Connect</span><span>Face ID / بصمة</span><span>Sign in with Apple · Google</span><span>تنبيهات محلية منطوقة</span><span>قراءة SMS على الجهاز</span></div>
+</section>
+
+<section>
+  <h2>خارطة الطريق</h2>
+  <div class="road">
+    <div class="card"><h3>✓ منجز</h3><p>iOS وأندرويد والساعة، شركاء الرعاية، وضع الزهايمر، النطاق الآمن، قراءة الرسائل، الصحة، المساعد الذكي، البطاقة الطبية، التقييمات.</p></div>
+    <div class="card now"><h3>◐ الربع القادم</h3><p>إطلاق تجريبي مع ٢٠٠ عائلة، الاشتراك العائلي، تقرير الطبيب PDF، تحسين كتالوج الأدوية السعودي.</p></div>
+    <div class="card"><h3>○ لاحقاً</h3><p>تكامل مباشر مع منصات وزارة الصحة، نسخة دور الرعاية، توصيل الأدوية عبر شركاء الصيدليات.</p></div>
+  </div>
+</section>
+
+<div class="ask">
+  <div><h2>نبحث عن شريك للمرحلة التالية</h2><p>التمويل سيُوجَّه إلى الإطلاق التجريبي، فريق الدعم، والتراخيص الصحية. تفاصيل الأرقام في العرض المرفق.</p></div>
+  <a class="cta" href="demo/index.html">▶ شاهد النموذج</a>
+</div>
+
+<footer>جرعة · Jor'ah — نموذج أولي للعرض. كل الأسماء والأرقام في النموذج وهمية. مرجع التصميم: <code>DESIGN.md</code>.</footer>
+</div>
+<script>
+/* تصغير الإطار ليناسب عرض الحاوية */
+function fit(){const f=document.querySelector('.frame'),i=document.getElementById('pf');const s=f.clientWidth/390;i.style.transform=`scale(${s})`;f.style.height=(844*s)+'px';}
+addEventListener('resize',fit);fit();
+</script>
+</body>
+</html>
