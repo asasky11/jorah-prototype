@@ -185,7 +185,7 @@ tailwind.config = {
 <script>
 const D = window.DEMO;
 const $ = (s, r = document) => r.querySelector(s);
-const state = { screen: 'onboarding', onb: 0, cups: D.water.cups, meds: JSON.parse(JSON.stringify(D.medications)), tab: 'home', alz: false };
+const state = { screen: 'about', onb: 0, cups: D.water.cups, meds: JSON.parse(JSON.stringify(D.medications)), tab: 'home', alz: false };
 
 /* زر الرجوع يظهر فقط عندما يُفتح النموذج مستقلاً، لا داخل إطار صفحة العرض */
 if (window.self === window.top) { $('#backLink').classList.replace('hidden', 'flex'); $('#backLinkM').classList.replace('hidden', 'inline-flex'); }
@@ -416,6 +416,7 @@ S.about = () => view(`
     <img src="../assets/icon.png" class="w-16 h-16 rounded-[18px] mx-auto mb-2.5 shadow-lg">
     <h3 class="!text-white !text-xl !mb-1">جرعة · Jor'ah</h3>
     <div class="text-[13px] opacity-90 leading-relaxed">تطبيق عربي للتذكير بالأدوية والمواعيد الطبية، يربط كل من يحتاج متابعة بمن يرعاه. متوفر على iOS وأندرويد وApple Watch بحساب واحد.</div>
+    <div class="flex gap-2.5 mt-3.5"><button class="btn flex-1 !h-11 bg-white text-primary" data-go="onboarding">▶ ابدأ الجولة</button><button class="btn flex-1 !h-11 bg-white/15 text-white border border-white/30" data-go="home">الشاشة الرئيسية</button></div>
   </div>
 
   <div class="card !border-2 !border-success relative mt-2">
@@ -529,10 +530,9 @@ $('#mDark').onclick = () => setDark(document.body.dataset.theme !== 'dark');
 $('#mAlz').onclick = () => setAlz(!state.alz);
 document.querySelectorAll('.panel [data-go]').forEach(b => b.onclick = () => { if (b.dataset.go === 'onboarding') state.onb = 0; go(b.dataset.go); });
 $('#btnNotify').onclick = () => { toast('⏰ حان وقت أتورفاستاتين ٢٠ ملغ · مع الغداء'); if (state.screen !== 'home') go('home'); };
-$('#btnReset').onclick = () => { state.meds = JSON.parse(JSON.stringify(D.medications)); state.cups = D.water.cups; state.onb = 0; setAlz(false); setDark(true); go('onboarding'); toast('أُعيدت البيانات التجريبية'); };
+$('#btnReset').onclick = () => { state.meds = JSON.parse(JSON.stringify(D.medications)); state.cups = D.water.cups; state.onb = 0; setAlz(false); setDark(true); go('about'); toast('أُعيدت البيانات التجريبية'); };
 
-/* على الجوال نبدأ من الرئيسية مباشرة */
-if (matchMedia('(max-width:760px)').matches) state.screen = 'home';
+/* الشاشة الافتتاحية: التطبيق والخدمات، ومنها ينتقل الزائر إلى أي شاشة */
 go(state.screen);
 </script>
 </body>
