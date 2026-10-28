@@ -62,12 +62,12 @@ tailwind.config = {
   .sheet-in{ animation:up .3s cubic-bezier(.2,.8,.2,1); }
 
   @layer base {
-    h1, h2, h3, b { @apply leading-snug; }
+    h1, h2, h3, b { line-height: 1.8; }
     p { @apply leading-[1.85]; }
   }
   @layer components {
     .card { @apply bg-card border border-cardb rounded-2.5xl p-4 mb-3.5 backdrop-blur-md; }
-    .card h3 { @apply text-[15px] font-bold mb-2.5 leading-snug; }
+    .card h3 { @apply text-[15px] font-bold mb-2.5 leading-[1.8]; }
     .sub { @apply text-muted text-[12.5px] leading-[1.8]; }
     .row { @apply flex items-center gap-3; }
     .sb { @apply justify-between; }
@@ -85,7 +85,7 @@ tailwind.config = {
     .appbar h2 { @apply text-xl font-extrabold; }
     .item { @apply flex items-center gap-3 p-3 rounded-[14px] bg-field; }
     .item .t { @apply text-xs text-muted min-w-[42px] text-center; }
-    .item .n { @apply font-bold text-sm leading-snug; }
+    .item .n { @apply font-bold text-sm leading-[1.8]; }
     .item.done { @apply opacity-60; } .item.done .n { @apply line-through; }
     .item.appt { @apply bg-appt/15 border-r-[3px] border-appt; }
     .item.missed { @apply border-r-[3px] border-alert; }
@@ -94,7 +94,7 @@ tailwind.config = {
     .bar i { @apply block h-full rounded-[3px] bg-success; } .bar i.low { @apply bg-alert; }
     .stat { @apply flex-1 text-center py-3 px-1.5 rounded-[14px] bg-field; }
     .stat b { @apply block text-xl font-extrabold; } .stat small { @apply text-muted text-[11px]; }
-    .set { @apply flex justify-between items-center py-3.5 border-b border-sep last:border-0 leading-snug; }
+    .set { @apply flex justify-between items-center py-3.5 border-b border-sep last:border-0 leading-[1.8]; }
     .set small { @apply block text-muted text-xs; }
     .sw { @apply w-11 h-[26px] rounded-[13px] bg-[#94A3B8] relative cursor-pointer transition flex-none; } .sw.on { @apply bg-success; }
     .avatar { @apply w-11 h-11 rounded-full bg-primary text-white grid place-items-center font-extrabold text-lg relative flex-none; }
