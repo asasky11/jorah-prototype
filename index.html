@@ -26,18 +26,22 @@ tailwind.config = {
 };
 </script>
 <style type="text/tailwindcss">
+  @layer base {
+    h1, h2, h3 { @apply leading-snug; }
+    p, li, small { @apply leading-[1.9]; }
+  }
   @layer components {
     .card { @apply bg-white dark:bg-card border border-sep dark:border-sepd rounded-2.5xl p-6; }
     .btn { @apply inline-flex items-center gap-2 rounded-2xl px-6 py-3 font-bold no-underline transition active:scale-[.98]; }
     .btn-primary { @apply btn bg-success text-white hover:bg-[#27795e]; }
     .btn-ghost { @apply btn bg-transparent text-ink dark:text-white border border-sep dark:border-sepd hover:bg-black/5 dark:hover:bg-white/5; }
-    .h2 { @apply text-3xl font-black mb-2; }
-    .lead { @apply text-muted dark:text-mutedd mb-6 max-w-2xl; }
+    .h2 { @apply text-3xl font-black mb-3 leading-snug; }
+    .lead { @apply text-muted dark:text-mutedd mb-7 max-w-2xl text-[17px] leading-[1.9]; }
     .chip { @apply bg-white dark:bg-card border border-sep dark:border-sepd rounded-xl px-4 py-1.5 text-sm font-semibold; }
   }
 </style>
 </head>
-<body class="font-cairo bg-ivory text-ink dark:bg-night dark:text-white leading-relaxed">
+<body class="font-cairo bg-ivory text-ink dark:bg-night dark:text-white leading-[1.9]">
 <div class="max-w-6xl mx-auto px-5">
 
   <!-- الترويسة -->
@@ -53,8 +57,8 @@ tailwind.config = {
   <!-- البطل -->
   <section class="grid md:grid-cols-[1.1fr_.9fr] gap-10 items-center py-12">
     <div>
-      <h1 class="text-4xl md:text-5xl font-black leading-snug">كل جرعة في وقتها،<br>و<span class="text-success">أهلك مطمئنون</span> أينما كانوا</h1>
-      <p class="text-lg text-muted dark:text-mutedd mt-5 mb-7">«جرعة» تطبيق عربي للتذكير بالأدوية والمواعيد الطبية، يقرأ رسائل «موعدي» و«وصفتي» تلقائياً، ويربط كل من يحتاج متابعة، كبيراً كان أو صغيراً أو مريض زهايمر، بمن يرعاه عبر وضع الرعاية.</p>
+      <h1 class="text-4xl md:text-5xl font-black leading-[1.35]">كل جرعة في وقتها،<br>و<span class="text-success">أهلك مطمئنون</span> أينما كانوا</h1>
+      <p class="text-lg text-muted dark:text-mutedd mt-6 mb-8 leading-[1.9]">«جرعة» تطبيق عربي للتذكير بالأدوية والمواعيد الطبية، يقرأ رسائل «موعدي» و«وصفتي» تلقائياً، ويربط كل من يحتاج متابعة، كبيراً كان أو صغيراً أو مريض زهايمر، بمن يرعاه عبر وضع الرعاية.</p>
       <div class="flex flex-wrap gap-3">
         <a class="btn-primary" href="demo/index.html">▶ النموذج التفاعلي</a>
         <a class="btn-ghost" href="DEMO_SCRIPT.md">سيناريو العرض</a>
@@ -79,9 +83,9 @@ tailwind.config = {
     <h2 class="h2">المشكلة</h2>
     <p class="lead">المرضى المزمنون وكبار السن يفوّتون الجرعات، وأهلهم لا يعرفون إلا بعد المضاعفات.</p>
     <div class="grid md:grid-cols-3 gap-4">
-      <div class="card border-r-4 !border-r-alert"><div class="text-3xl mb-2">💊</div><h3 class="font-extrabold text-lg mb-1">نصف المرضى لا يلتزمون</h3><p class="text-sm text-muted dark:text-mutedd">نسبة الالتزام بالأدوية المزمنة لا تتجاوز ٥٠٪ عالمياً، وتنخفض أكثر مع تعدد الأدوية وتقدم العمر.</p></div>
-      <div class="card border-r-4 !border-r-alert"><div class="text-3xl mb-2">📱</div><h3 class="font-extrabold text-lg mb-1">تطبيقات لا تفهم السوق</h3><p class="text-sm text-muted dark:text-mutedd">التطبيقات الحالية مترجمة، لا تقرأ رسائل المواعيد الرسمية، ولا تدعم الاتجاه العربي أو التقويم الهجري.</p></div>
-      <div class="card border-r-4 !border-r-alert"><div class="text-3xl mb-2">👵</div><h3 class="font-extrabold text-lg mb-1">من يحتاج متابعة يبقى وحده</h3><p class="text-sm text-muted dark:text-mutedd">أم تعيش مع الزهايمر، أب مسنّ في مدينة أخرى، أو طفل يأخذ دواءً مزمناً: لا طريقة لمعرفة أن الجرعة أُخذت أو أنه خرج من البيت.</p></div>
+      <div class="card border-r-4 !border-r-alert"><div class="text-3xl mb-2">💊</div><h3 class="font-extrabold text-lg mb-2 leading-snug">نصف المرضى لا يلتزمون</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">نسبة الالتزام بالأدوية المزمنة لا تتجاوز ٥٠٪ عالمياً، وتنخفض أكثر مع تعدد الأدوية وتقدم العمر.</p></div>
+      <div class="card border-r-4 !border-r-alert"><div class="text-3xl mb-2">📱</div><h3 class="font-extrabold text-lg mb-2 leading-snug">تطبيقات لا تفهم السوق</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">التطبيقات الحالية مترجمة، لا تقرأ رسائل المواعيد الرسمية، ولا تدعم الاتجاه العربي أو التقويم الهجري.</p></div>
+      <div class="card border-r-4 !border-r-alert"><div class="text-3xl mb-2">👵</div><h3 class="font-extrabold text-lg mb-2 leading-snug">من يحتاج متابعة يبقى وحده</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">أم تعيش مع الزهايمر، أب مسنّ في مدينة أخرى، أو طفل يأخذ دواءً مزمناً: لا طريقة لمعرفة أن الجرعة أُخذت أو أنه خرج من البيت.</p></div>
     </div>
   </section>
 
@@ -95,17 +99,17 @@ tailwind.config = {
         <div class="text-5xl">🫶</div>
         <div>
           <h3 class="font-extrabold text-xl mb-1">وضع الرعاية لكل من يحتاج متابعة</h3>
-          <p class="text-sm text-muted dark:text-mutedd">كبار السن، الأطفال، مرضى الزهايمر، وكل مريض يحتاج أحداً يطمئن عليه. المريض يرى واجهة مبسّطة مكبّرة بزر واحد وصوت قريبه بدل الرنة، ومن يرعاه يرى الجرعات والموقع والحالة اليومية لحظياً، وتصله التنبيهات عند التأخر أو الخروج من النطاق الآمن. يُفعّل بنقرة ويعمل مع أي مريض.</p>
+          <p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">كبار السن، الأطفال، مرضى الزهايمر، وكل مريض يحتاج أحداً يطمئن عليه. المريض يرى واجهة مبسّطة مكبّرة بزر واحد وصوت قريبه بدل الرنة، ومن يرعاه يرى الجرعات والموقع والحالة اليومية لحظياً، وتصله التنبيهات عند التأخر أو الخروج من النطاق الآمن. يُفعّل بنقرة ويعمل مع أي مريض.</p>
         </div>
       </div>
     </div>
     <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-      <div class="card"><div class="text-3xl mb-2">⏰</div><h3 class="font-extrabold text-lg mb-1">تذكير ذكي بالعربية</h3><p class="text-sm text-muted dark:text-mutedd">جدولة الأدوية مع تنبيه منطوق، تأجيل بلمسة، خصم تلقائي من المخزون، وتذكير بإعادة التعبئة.</p></div>
-      <div class="card"><div class="text-3xl mb-2">✉️</div><h3 class="font-extrabold text-lg mb-1">قراءة رسائل موعدي ووصفتي</h3><p class="text-sm text-muted dark:text-mutedd">الرسالة الرسمية تتحول تلقائياً إلى موعد في التقويم أو دواء في الجدول، على الجهاز دون رفع للسحابة.</p></div>
-      <div class="card"><div class="text-3xl mb-2">👨‍👩‍👧</div><h3 class="font-extrabold text-lg mb-1">شركاء الرعاية</h3><p class="text-sm text-muted dark:text-mutedd">دعوة الأقارب برمز QR، صلاحيات محددة، سجل لحظي للجرعات، وتنبيه فوري عند التأخر.</p></div>
-      <div class="card"><div class="text-3xl mb-2">📍</div><h3 class="font-extrabold text-lg mb-1">النطاق الآمن</h3><p class="text-sm text-muted dark:text-mutedd">طوق أخضر حول المنزل وطوق أحمر للطوارئ. الخروج برفقة قريب لا يُطلق إنذاراً، والخروج وحده ينبّه الأهل بالموقع والبطارية.</p></div>
-      <div class="card"><div class="text-3xl mb-2">⌚</div><h3 class="font-extrabold text-lg mb-1">الصحة والساعة الذكية</h3><p class="text-sm text-muted dark:text-mutedd">النبض والأكسجين وتخطيط القلب والنوم من Apple Watch وHealth Connect، وتطبيق مستقل على الساعة.</p></div>
-      <div class="card"><div class="text-3xl mb-2">✨</div><h3 class="font-extrabold text-lg mb-1">مساعد ذكي على الجهاز</h3><p class="text-sm text-muted dark:text-mutedd">يكتشف أنماط التأخر ونقص المخزون ويقترح تعديلات، ويكيّف الواجهة تلقائياً لكبار السن.</p></div>
+      <div class="card"><div class="text-3xl mb-2">⏰</div><h3 class="font-extrabold text-lg mb-2 leading-snug">تذكير ذكي بالعربية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">جدولة الأدوية مع تنبيه منطوق، تأجيل بلمسة، خصم تلقائي من المخزون، وتذكير بإعادة التعبئة.</p></div>
+      <div class="card"><div class="text-3xl mb-2">✉️</div><h3 class="font-extrabold text-lg mb-2 leading-snug">قراءة رسائل موعدي ووصفتي</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">الرسالة الرسمية تتحول تلقائياً إلى موعد في التقويم أو دواء في الجدول، على الجهاز دون رفع للسحابة.</p></div>
+      <div class="card"><div class="text-3xl mb-2">👨‍👩‍👧</div><h3 class="font-extrabold text-lg mb-2 leading-snug">شركاء الرعاية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">دعوة الأقارب برمز QR، صلاحيات محددة، سجل لحظي للجرعات، وتنبيه فوري عند التأخر.</p></div>
+      <div class="card"><div class="text-3xl mb-2">📍</div><h3 class="font-extrabold text-lg mb-2 leading-snug">النطاق الآمن</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">طوق أخضر حول المنزل وطوق أحمر للطوارئ. الخروج برفقة قريب لا يُطلق إنذاراً، والخروج وحده ينبّه الأهل بالموقع والبطارية.</p></div>
+      <div class="card"><div class="text-3xl mb-2">⌚</div><h3 class="font-extrabold text-lg mb-2 leading-snug">الصحة والساعة الذكية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">النبض والأكسجين وتخطيط القلب والنوم من Apple Watch وHealth Connect، وتطبيق مستقل على الساعة.</p></div>
+      <div class="card"><div class="text-3xl mb-2">✨</div><h3 class="font-extrabold text-lg mb-2 leading-snug">مساعد ذكي على الجهاز</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يكتشف أنماط التأخر ونقص المخزون ويقترح تعديلات، ويكيّف الواجهة تلقائياً لكبار السن.</p></div>
     </div>
   </section>
 
@@ -113,10 +117,10 @@ tailwind.config = {
   <section class="py-8">
     <h2 class="h2">كيف يعمل</h2>
     <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-      <div class="card relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">١</span><h3 class="font-extrabold mb-1">يسجّل المريض أدويته</h3><p class="text-sm text-muted dark:text-mutedd">يدوياً بمنتقي شكل الحبة، أو من رسالة وصفتي، أو من كتالوج الأدوية الذكي.</p></div>
-      <div class="card relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">٢</span><h3 class="font-extrabold mb-1">يصل التذكير في وقته</h3><p class="text-sm text-muted dark:text-mutedd">على الهاتف والساعة، منطوقاً بالعربية، مع زر «تم» وزر «تأجيل».</p></div>
-      <div class="card relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">٣</span><h3 class="font-extrabold mb-1">يرى الأهل ما يحدث</h3><p class="text-sm text-muted dark:text-mutedd">سجل رعاية لحظي، وتنبيه إن تأخرت الجرعة أو خرج المريض من النطاق الآمن.</p></div>
-      <div class="card relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">٤</span><h3 class="font-extrabold mb-1">يتعلّم التطبيق</h3><p class="text-sm text-muted dark:text-mutedd">يقترح تعديل الأوقات، يذكّر بالتعبئة، ويرفع تقريراً للطبيب في المراجعة.</p></div>
+      <div class="card relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">١</span><h3 class="font-extrabold mb-2 leading-snug">يسجّل المريض أدويته</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يدوياً بمنتقي شكل الحبة، أو من رسالة وصفتي، أو من كتالوج الأدوية الذكي.</p></div>
+      <div class="card relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">٢</span><h3 class="font-extrabold mb-2 leading-snug">يصل التذكير في وقته</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">على الهاتف والساعة، منطوقاً بالعربية، مع زر «تم» وزر «تأجيل».</p></div>
+      <div class="card relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">٣</span><h3 class="font-extrabold mb-2 leading-snug">يرى الأهل ما يحدث</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">سجل رعاية لحظي، وتنبيه إن تأخرت الجرعة أو خرج المريض من النطاق الآمن.</p></div>
+      <div class="card relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">٤</span><h3 class="font-extrabold mb-2 leading-snug">يتعلّم التطبيق</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يقترح تعديل الأوقات، يذكّر بالتعبئة، ويرفع تقريراً للطبيب في المراجعة.</p></div>
     </div>
   </section>
 
@@ -134,15 +138,15 @@ tailwind.config = {
     <h2 class="h2">الوكلاء العاملون في التطبيق</h2>
     <p class="lead">تسعة وكلاء يعملون على الجهاز، لكل واحد دور محدد وقواعد لا يتجاوزها. لا يشخّص أيٌّ منهم ولا يغيّر جرعة دون موافقة.</p>
     <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-      <div class="card"><div class="text-3xl mb-2">🫶</div><h3 class="font-extrabold mb-1">وكيل الرعاية</h3><p class="text-sm text-muted dark:text-mutedd">يستمع لكلام المريض العفوي، يفهم نبرته وشكواه، يجيبه بصوت دافئ، ويبلغ العائلة بملخص مع التسجيل. يربط العرض بدواء أُخذ خلال الساعات الست الماضية، ويبلّغ فوراً بالموقع عند عرض عاجل.</p></div>
-      <div class="card"><div class="text-3xl mb-2">👨‍👩‍👧</div><h3 class="font-extrabold mb-1">منسق العائلة</h3><p class="text-sm text-muted dark:text-mutedd">ينبّه الأقرب جغرافياً أولاً عند تأخر الجرعة، يسأل «من يرافقه للموعد؟» ويغلق البطاقة عند أول رد، يرسل نشرة مسائية، يوثّق من أعطى الدواء، ويدير لوحة مقدم الرعاية وأزرار الاستغاثة.</p></div>
-      <div class="card"><div class="text-3xl mb-2">⏰</div><h3 class="font-extrabold mb-1">مجدول التذكيرات</h3><p class="text-sm text-muted dark:text-mutedd">تدرج ثلاثي: تمهيد قبل ١٥ دقيقة، التنبيه بصوت القريب في الموعد، ثم تنبيه مقدم الرعاية بعد ٣٠ دقيقة بلا تأكيد. يذكّر بالموعد قبل يوم و١٢ ساعة وساعتين، ويكشف الوصول للمستشفى تلقائياً.</p></div>
-      <div class="card"><div class="text-3xl mb-2">📍</div><h3 class="font-extrabold mb-1">مراقب النطاق الآمن</h3><p class="text-sm text-muted dark:text-mutedd">يميّز الخروج برفقة قريب عن الخروج وحده، ويقدّر الحركة والبطارية. الحذر مراقبة صامتة، والطوارئ فقط تُنبّه بصوت مع شاشة «طريقي إلى البيت» بصوت القريب.</p></div>
-      <div class="card"><div class="text-3xl mb-2">🗓</div><h3 class="font-extrabold mb-1">محرك الجدولة الذكية</h3><p class="text-sm text-muted dark:text-mutedd">يقود إضافة الدواء بخمس خطوات، يربط كل جرعة بوجبة أو بالنوم مع سبب مفهوم، يباعد المضادات الحيوية، يكشف الدواء المكرر والتعارض الحرج ويجمّد الجدول حتى مراجعة الطبيب.</p></div>
-      <div class="card"><div class="text-3xl mb-2">🔎</div><h3 class="font-extrabold mb-1">التعرف الذكي على الدواء</h3><p class="text-sm text-muted dark:text-mutedd">يحوّل الاسم التجاري كما على العبوة إلى مادة فعالة وفئة. الكتالوج المحلي أولاً دون اتصال، ثم نموذج الجهاز، ثم قاعدة RxNorm. لا يتعلّم دواءً جديداً إلا بقبول المستخدم.</p></div>
-      <div class="card"><div class="text-3xl mb-2">✨</div><h3 class="font-extrabold mb-1">مساعد الأنماط</h3><p class="text-sm text-muted dark:text-mutedd">يحلل سلوك المريض مع الدواء على مدى أسابيع: الدواء الذي يُؤخذ متأخراً دائماً، وفترة اليوم الأكثر تفويتاً. يقترح إزاحة الجرعة أو توسيع النطاق، ولا يطبّق شيئاً دون موافقة.</p></div>
-      <div class="card"><div class="text-3xl mb-2">📄</div><h3 class="font-extrabold mb-1">مُعدّ تقرير الطبيب</h3><p class="text-sm text-muted dark:text-mutedd">يحوّل ما سجّلته العائلة والمريض خلال الشهور إلى تقرير من صفحة واحدة: الالتزام لكل دواء، الأعراض بعد الجرعات، القياسات وبيانات الساعة. عربي وإنجليزي وPDF قبل الموعد بيوم.</p></div>
-      <div class="card"><div class="text-3xl mb-2">💧</div><h3 class="font-extrabold mb-1">مذكّر شرب الماء</h3><p class="text-sm text-muted dark:text-mutedd">يوزّع التذكيرات على ساعات اليقظة بنصيحة توعوية، لا يزيد على سبعة في اليوم ولا يرسل أثناء النوم. الالتزام الضعيف يُحال إلى مساعد الأنماط.</p></div>
+      <div class="card"><div class="text-3xl mb-2">🫶</div><h3 class="font-extrabold mb-2 leading-snug">وكيل الرعاية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يستمع لكلام المريض العفوي، يفهم نبرته وشكواه، يجيبه بصوت دافئ، ويبلغ العائلة بملخص مع التسجيل. يربط العرض بدواء أُخذ خلال الساعات الست الماضية، ويبلّغ فوراً بالموقع عند عرض عاجل.</p></div>
+      <div class="card"><div class="text-3xl mb-2">👨‍👩‍👧</div><h3 class="font-extrabold mb-2 leading-snug">منسق العائلة</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">ينبّه الأقرب جغرافياً أولاً عند تأخر الجرعة، يسأل «من يرافقه للموعد؟» ويغلق البطاقة عند أول رد، يرسل نشرة مسائية، يوثّق من أعطى الدواء، ويدير لوحة مقدم الرعاية وأزرار الاستغاثة.</p></div>
+      <div class="card"><div class="text-3xl mb-2">⏰</div><h3 class="font-extrabold mb-2 leading-snug">مجدول التذكيرات</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">تدرج ثلاثي: تمهيد قبل ١٥ دقيقة، التنبيه بصوت القريب في الموعد، ثم تنبيه مقدم الرعاية بعد ٣٠ دقيقة بلا تأكيد. يذكّر بالموعد قبل يوم و١٢ ساعة وساعتين، ويكشف الوصول للمستشفى تلقائياً.</p></div>
+      <div class="card"><div class="text-3xl mb-2">📍</div><h3 class="font-extrabold mb-2 leading-snug">مراقب النطاق الآمن</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يميّز الخروج برفقة قريب عن الخروج وحده، ويقدّر الحركة والبطارية. الحذر مراقبة صامتة، والطوارئ فقط تُنبّه بصوت مع شاشة «طريقي إلى البيت» بصوت القريب.</p></div>
+      <div class="card"><div class="text-3xl mb-2">🗓</div><h3 class="font-extrabold mb-2 leading-snug">محرك الجدولة الذكية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يقود إضافة الدواء بخمس خطوات، يربط كل جرعة بوجبة أو بالنوم مع سبب مفهوم، يباعد المضادات الحيوية، يكشف الدواء المكرر والتعارض الحرج ويجمّد الجدول حتى مراجعة الطبيب.</p></div>
+      <div class="card"><div class="text-3xl mb-2">🔎</div><h3 class="font-extrabold mb-2 leading-snug">التعرف الذكي على الدواء</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يحوّل الاسم التجاري كما على العبوة إلى مادة فعالة وفئة. الكتالوج المحلي أولاً دون اتصال، ثم نموذج الجهاز، ثم قاعدة RxNorm. لا يتعلّم دواءً جديداً إلا بقبول المستخدم.</p></div>
+      <div class="card"><div class="text-3xl mb-2">✨</div><h3 class="font-extrabold mb-2 leading-snug">مساعد الأنماط</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يحلل سلوك المريض مع الدواء على مدى أسابيع: الدواء الذي يُؤخذ متأخراً دائماً، وفترة اليوم الأكثر تفويتاً. يقترح إزاحة الجرعة أو توسيع النطاق، ولا يطبّق شيئاً دون موافقة.</p></div>
+      <div class="card"><div class="text-3xl mb-2">📄</div><h3 class="font-extrabold mb-2 leading-snug">مُعدّ تقرير الطبيب</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يحوّل ما سجّلته العائلة والمريض خلال الشهور إلى تقرير من صفحة واحدة: الالتزام لكل دواء، الأعراض بعد الجرعات، القياسات وبيانات الساعة. عربي وإنجليزي وPDF قبل الموعد بيوم.</p></div>
+      <div class="card"><div class="text-3xl mb-2">💧</div><h3 class="font-extrabold mb-2 leading-snug">مذكّر شرب الماء</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يوزّع التذكيرات على ساعات اليقظة بنصيحة توعوية، لا يزيد على سبعة في اليوم ولا يرسل أثناء النوم. الالتزام الضعيف يُحال إلى مساعد الأنماط.</p></div>
     </div>
   </section>
 
@@ -150,9 +154,9 @@ tailwind.config = {
   <section class="py-8">
     <h2 class="h2">خارطة الطريق</h2>
     <div class="grid md:grid-cols-3 gap-4 mt-4">
-      <div class="card"><h3 class="font-extrabold text-success mb-1">✓ منجز</h3><p class="text-sm text-muted dark:text-mutedd">iOS وأندرويد والساعة، وضع الرعاية، شركاء الرعاية، النطاق الآمن، قراءة الرسائل، الصحة، المساعد الذكي، البطاقة الطبية، التقييمات.</p></div>
-      <div class="card"><h3 class="font-extrabold text-warning mb-1">◐ الربع القادم</h3><p class="text-sm text-muted dark:text-mutedd">إطلاق تجريبي مع ٢٠٠ عائلة، الاشتراك العائلي، تقرير الطبيب PDF، تحسين كتالوج الأدوية السعودي.</p></div>
-      <div class="card"><h3 class="font-extrabold text-success mb-1">○ لاحقاً</h3><p class="text-sm text-muted dark:text-mutedd">تكامل مباشر مع منصات وزارة الصحة، نسخة دور الرعاية، توصيل الأدوية عبر شركاء الصيدليات.</p></div>
+      <div class="card"><h3 class="font-extrabold text-success mb-1">✓ منجز</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">iOS وأندرويد والساعة، وضع الرعاية، شركاء الرعاية، النطاق الآمن، قراءة الرسائل، الصحة، المساعد الذكي، البطاقة الطبية، التقييمات.</p></div>
+      <div class="card"><h3 class="font-extrabold text-warning mb-1">◐ الربع القادم</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">إطلاق تجريبي مع ٢٠٠ عائلة، الاشتراك العائلي، تقرير الطبيب PDF، تحسين كتالوج الأدوية السعودي.</p></div>
+      <div class="card"><h3 class="font-extrabold text-success mb-1">○ لاحقاً</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">تكامل مباشر مع منصات وزارة الصحة، نسخة دور الرعاية، توصيل الأدوية عبر شركاء الصيدليات.</p></div>
     </div>
   </section>
 

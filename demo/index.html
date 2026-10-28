@@ -61,10 +61,14 @@ tailwind.config = {
   @keyframes up { from { transform:translateY(60px); opacity:0; } }
   .sheet-in{ animation:up .3s cubic-bezier(.2,.8,.2,1); }
 
+  @layer base {
+    h1, h2, h3, b { @apply leading-snug; }
+    p { @apply leading-[1.85]; }
+  }
   @layer components {
     .card { @apply bg-card border border-cardb rounded-2.5xl p-4 mb-3.5 backdrop-blur-md; }
-    .card h3 { @apply text-[15px] font-bold mb-2.5; }
-    .sub { @apply text-muted text-[12.5px]; }
+    .card h3 { @apply text-[15px] font-bold mb-2.5 leading-snug; }
+    .sub { @apply text-muted text-[12.5px] leading-[1.8]; }
     .row { @apply flex items-center gap-3; }
     .sb { @apply justify-between; }
     .btn { @apply font-bold border-0 rounded-[14px] h-12 px-[18px] cursor-pointer inline-flex items-center justify-center gap-2 transition-transform active:scale-[.97]; }
@@ -81,21 +85,21 @@ tailwind.config = {
     .appbar h2 { @apply text-xl font-extrabold; }
     .item { @apply flex items-center gap-3 p-3 rounded-[14px] bg-field; }
     .item .t { @apply text-xs text-muted min-w-[42px] text-center; }
-    .item .n { @apply font-bold text-sm; }
+    .item .n { @apply font-bold text-sm leading-snug; }
     .item.done { @apply opacity-60; } .item.done .n { @apply line-through; }
     .item.appt { @apply bg-appt/15 border-r-[3px] border-appt; }
     .item.missed { @apply border-r-[3px] border-alert; }
-    .med { @apply flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-cardb mb-2.5 cursor-pointer; }
+    .med { @apply flex items-center gap-3 p-4 rounded-2xl bg-card border border-cardb mb-2.5 cursor-pointer; }
     .bar { @apply h-1.5 rounded-[3px] bg-field overflow-hidden mt-1.5; }
     .bar i { @apply block h-full rounded-[3px] bg-success; } .bar i.low { @apply bg-alert; }
     .stat { @apply flex-1 text-center py-3 px-1.5 rounded-[14px] bg-field; }
     .stat b { @apply block text-xl font-extrabold; } .stat small { @apply text-muted text-[11px]; }
-    .set { @apply flex justify-between items-center py-3 border-b border-sep last:border-0; }
+    .set { @apply flex justify-between items-center py-3.5 border-b border-sep last:border-0 leading-snug; }
     .set small { @apply block text-muted text-xs; }
     .sw { @apply w-11 h-[26px] rounded-[13px] bg-[#94A3B8] relative cursor-pointer transition flex-none; } .sw.on { @apply bg-success; }
     .avatar { @apply w-11 h-11 rounded-full bg-primary text-white grid place-items-center font-extrabold text-lg relative flex-none; }
     .avatar.on::after { content:''; @apply absolute bottom-px left-px w-[11px] h-[11px] rounded-full bg-success border-2 border-bg; }
-    .feed { @apply flex gap-2.5 py-2.5 border-b border-sep last:border-0; }
+    .feed { @apply flex gap-2.5 py-3 border-b border-sep last:border-0; }
     .feed i { @apply w-2.5 h-2.5 rounded-full mt-[7px] flex-none; }
     .feed .ok { @apply bg-success; } .feed .warn { @apply bg-warning; } .feed .info { @apply bg-appt; }
     .day { @apply flex-1 h-[62px] rounded-[14px] flex flex-col items-center justify-center gap-0.5 text-xs text-muted bg-card border border-cardb; }
@@ -114,7 +118,7 @@ tailwind.config = {
     .grid-c { @apply h-11 rounded-[10px] flex flex-col items-center justify-center text-[13px] gap-0.5; } .grid-c.today { @apply bg-primary text-white font-extrabold; }
     .panel-btn { @apply w-full text-right px-2.5 py-2 rounded-[9px] border border-cardb bg-transparent text-ink cursor-pointer mb-1.5 hover:bg-field; }
     .panel-btn.active { @apply bg-primary text-white border-transparent; }
-    .ins p { @apply text-muted text-[13px] leading-relaxed my-1 mb-2.5; }
+    .ins p { @apply text-muted text-[13px] leading-[1.85] my-1.5 mb-3; }
   }
 
   /* على الجوال الحقيقي يملأ الشاشة بلا إطار */
@@ -130,7 +134,7 @@ tailwind.config = {
   }
 </style>
 </head>
-<body data-theme="dark" class="font-cairo bg-stage text-ink min-h-screen flex items-center justify-center gap-7 p-5 transition-colors">
+<body data-theme="dark" class="font-cairo bg-stage text-ink leading-[1.8] min-h-screen flex items-center justify-center gap-7 p-5 transition-colors">
 
 <!-- لوحة العرض الجانبية -->
 <aside class="panel w-[250px] text-sm flex flex-col gap-3.5">
@@ -230,7 +234,7 @@ S.onboarding = () => {
   return `<div class="flex-1 flex flex-col px-6 pt-5 pb-[30px] text-center">
     <div class="row sb"><button class="btn-n h-9 text-[13px]" data-go="login">تخطي</button><button class="btn-n h-9 text-[13px] !text-success" data-go="about">★ التطبيق والخدمات</button></div>
     <div class="flex-1 grid place-items-center text-[96px]">${c.art}</div>
-    <h2 class="text-2xl font-extrabold mb-2.5">${c.h}</h2><p class="text-muted leading-loose text-[14.5px] mb-6">${c.p}</p>
+    <h2 class="text-2xl font-extrabold mb-2.5">${c.h}</h2><p class="text-muted leading-[1.9] text-[14.5px] mb-7 px-1">${c.p}</p>
     <div class="flex gap-1.5 justify-center mb-5">${cards.map((_, i) => `<i class="h-2 rounded ${i === state.onb ? 'w-[22px] bg-success' : 'w-2 bg-sep'}"></i>`).join('')}</div>
     <button class="btn-g btn-full" id="onbNext">${state.onb < 2 ? 'التالي' : 'ابدأ الآن'}</button>
   </div>`;
@@ -316,7 +320,7 @@ S.med = id => { const m = state.meds.find(x => x.id === id); const pct = Math.ro
   <div class="card"><h3>سجل الالتزام · آخر ٧ أيام</h3><div class="flex items-end gap-1.5 h-[70px] mt-2">${D.adherenceWeek.map(v => `<i class="flex-1 rounded-t-md rounded-b-sm opacity-85 ${v < 70 ? 'bg-warning' : 'bg-success'}" style="height:${v}%"></i>`).join('')}</div>
     <div class="row sb sub mt-1.5"><span>س</span><span>ح</span><span>ن</span><span>ث</span><span>ر</span><span>خ</span><span>ج</span></div>
     <div class="hr"></div><div class="row sb"><span class="sub">نسبة الالتزام الشهرية</span><b class="text-success">${ar(m.adherence)}٪</b></div></div>
-  <div class="card"><h3>ℹ️ معلومات الدواء</h3><div class="sub leading-loose">المادة الفعالة والفئة الدوائية والتعليمات الشائعة تُعرض هنا من كتالوج الأدوية، مع تحذير التفاعلات إن وُجد.</div></div>`) + nav(); };
+  <div class="card"><h3>ℹ️ معلومات الدواء</h3><div class="sub leading-[1.9]">المادة الفعالة والفئة الدوائية والتعليمات الشائعة تُعرض هنا من كتالوج الأدوية، مع تحذير التفاعلات إن وُجد.</div></div>`) + nav(); };
 
 S.appt = id => { const a = D.appointments.find(x => x.id === id); return view(`
   ${appbar('تفاصيل الموعد', '<button class="ib">↗</button>', back('home'))}
@@ -415,13 +419,13 @@ S.about = () => view(`
   <div class="card !border-0 text-white bg-gradient-to-br from-primary to-success/90 text-center">
     <img src="../assets/icon.png" class="w-16 h-16 rounded-[18px] mx-auto mb-2.5 shadow-lg">
     <h3 class="!text-white !text-xl !mb-1">جرعة · Jor'ah</h3>
-    <div class="text-[13px] opacity-90 leading-relaxed">تطبيق عربي للتذكير بالأدوية والمواعيد الطبية، يربط كل من يحتاج متابعة بمن يرعاه. متوفر على iOS وأندرويد وApple Watch بحساب واحد.</div>
+    <div class="text-[13.5px] opacity-90 leading-[1.9]">تطبيق عربي للتذكير بالأدوية والمواعيد الطبية، يربط كل من يحتاج متابعة بمن يرعاه. متوفر على iOS وأندرويد وApple Watch بحساب واحد.</div>
     <div class="flex gap-2.5 mt-3.5"><button class="btn flex-1 !h-11 bg-white text-primary" data-go="onboarding">▶ ابدأ الجولة</button><button class="btn flex-1 !h-11 bg-white/15 text-white border border-white/30" data-go="home">الشاشة الرئيسية</button></div>
   </div>
 
   <div class="card !border-2 !border-success relative mt-2">
     <span class="chip bg-success text-white absolute -top-2.5 right-4">الميزة الأساسية</span>
-    <div class="flex gap-3 items-start mt-1"><div class="text-3xl flex-none">🫶</div><div><h3 class="!mb-1">وضع الرعاية لكل من يحتاج متابعة</h3><div class="sub leading-relaxed">كبار السن، الأطفال، مرضى الزهايمر، وكل مريض يحتاج أحداً يطمئن عليه. واجهة مبسّطة مكبّرة للمريض، ومتابعة لحظية للجرعات والموقع والحالة لمن يرعاه.</div></div></div>
+    <div class="flex gap-3 items-start mt-1"><div class="text-3xl flex-none">🫶</div><div><h3 class="!mb-1">وضع الرعاية لكل من يحتاج متابعة</h3><div class="sub leading-[1.85]">كبار السن، الأطفال، مرضى الزهايمر، وكل مريض يحتاج أحداً يطمئن عليه. واجهة مبسّطة مكبّرة للمريض، ومتابعة لحظية للجرعات والموقع والحالة لمن يرعاه.</div></div></div>
     <button class="btn-g !h-10 !text-[13px] w-full mt-3" id="aboutAlz">جرّب وضع الرعاية الآن</button>
   </div>
 
@@ -437,7 +441,7 @@ S.about = () => view(`
     ['✨','المساعد الذكي','يكتشف أنماط التأخر ونقص المخزون ويقترح تعديلات بموافقتك.','insights'],
     ['🪪','بطاقة التعريف الطبية','الاسم وفصيلة الدم والأمراض والأدوية ورقم الطوارئ مع رمز QR.','medicalid'],
     ['📋','التقييمات الصحية','اختبار خطر ما قبل السكري وتقييمات أخرى من وزارة الصحة.','assess'],
-  ].map(([i,t,d,g]) => `<div class="med" data-go="${g}"><span class="text-2xl flex-none">${i}</span><div class="flex-1"><b class="text-sm">${t}</b><div class="sub leading-relaxed">${d}</div></div><span class="sub">›</span></div>`).join('')}
+  ].map(([i,t,d,g]) => `<div class="med" data-go="${g}"><span class="text-2xl flex-none">${i}</span><div class="flex-1"><b class="text-sm">${t}</b><div class="sub leading-[1.8] mt-0.5">${d}</div></div><span class="sub">›</span></div>`).join('')}
 
   <h3 class="text-[15px] font-bold mt-4 mb-2">الوكلاء العاملون في التطبيق</h3>
   <div class="card"><div class="sub mb-2">تسعة وكلاء على الجهاز، لكل واحد دور وقواعد. لا يشخّص أيٌّ منهم ولا يغيّر جرعة دون موافقة.</div>
