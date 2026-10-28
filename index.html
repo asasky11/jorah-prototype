@@ -30,6 +30,33 @@ tailwind.config = {
     h1, h2, h3 { line-height: 1.8; }
     p, li, small { @apply leading-[1.9]; }
   }
+  /* ---- الحركة والمؤثرات ---- */
+  @keyframes blob { 0%,100%{ transform:translate(0,0) scale(1); } 33%{ transform:translate(40px,-30px) scale(1.1); } 66%{ transform:translate(-30px,25px) scale(.95); } }
+  @keyframes floaty { 0%,100%{ transform:translateY(0) rotate(-1deg); } 50%{ transform:translateY(-14px) rotate(1deg); } }
+  @keyframes shimmer { to { background-position: 200% center; } }
+  @keyframes pulse-ring { 0%{ box-shadow:0 0 0 0 rgba(45,138,107,.45); } 70%{ box-shadow:0 0 0 16px rgba(45,138,107,0); } 100%{ box-shadow:0 0 0 0 rgba(45,138,107,0); } }
+  @keyframes gradient-shift { 0%{ background-position:0% 50%; } 50%{ background-position:100% 50%; } 100%{ background-position:0% 50%; } }
+  @keyframes drift { from { transform:translateY(0); } to { transform:translateY(-100vh); } }
+  .blob { @apply absolute rounded-full blur-3xl pointer-events-none; animation: blob 18s ease-in-out infinite; }
+  .float { animation: floaty 6s ease-in-out infinite; }
+  .shine { background: linear-gradient(90deg, #2D8A6B 0%, #8CC4E8 40%, #2D8A6B 60%, #D99B26 100%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 5s linear infinite; }
+  .pulse { animation: pulse-ring 2.4s ease-out infinite; }
+  .gradient-live { background-size: 200% 200%; animation: gradient-shift 10s ease infinite; }
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  .stagger > * { opacity: 0; transform: translateY(22px); transition: opacity .6s cubic-bezier(.2,.8,.2,1), transform .6s cubic-bezier(.2,.8,.2,1); }
+  .stagger.in > * { opacity: 1; transform: none; }
+  .stagger.in > *:nth-child(2){ transition-delay:.08s } .stagger.in > *:nth-child(3){ transition-delay:.16s } .stagger.in > *:nth-child(4){ transition-delay:.24s } .stagger.in > *:nth-child(5){ transition-delay:.32s } .stagger.in > *:nth-child(6){ transition-delay:.40s } .stagger.in > *:nth-child(7){ transition-delay:.48s } .stagger.in > *:nth-child(8){ transition-delay:.56s } .stagger.in > *:nth-child(9){ transition-delay:.64s } .stagger.in > *:nth-child(n+10){ transition-delay:.7s }
+  .lift { @apply transition-all duration-300; }
+  .lift:hover { transform: translateY(-6px); box-shadow: 0 18px 40px -12px rgba(14,58,90,.28); border-color: rgba(45,138,107,.45); }
+  .tilt { transition: transform .25s ease; transform-style: preserve-3d; }
+  .particle { @apply absolute rounded-full pointer-events-none; background: rgba(45,138,107,.35); animation: drift linear infinite; }
+  .progress-bar { position: fixed; top: 0; right: 0; height: 3px; width: 0; background: linear-gradient(90deg,#2D8A6B,#8CC4E8); z-index: 100; transition: width .1s linear; }
+  @media (prefers-reduced-motion: reduce) {
+    .blob, .float, .shine, .pulse, .gradient-live, .particle { animation: none !important; }
+    .reveal, .stagger > * { opacity: 1 !important; transform: none !important; transition: none !important; }
+    .lift:hover, .tilt { transform: none !important; }
+  }
   @layer components {
     .card { @apply bg-white dark:bg-card border border-sep dark:border-sepd rounded-2.5xl p-6; }
     .btn { @apply inline-flex items-center gap-2 rounded-2xl px-6 py-3 font-bold no-underline transition active:scale-[.98]; }
@@ -41,59 +68,67 @@ tailwind.config = {
   }
 </style>
 </head>
-<body class="font-cairo bg-ivory text-ink dark:bg-night dark:text-white leading-[1.9]">
+<body class="font-cairo bg-ivory text-ink dark:bg-night dark:text-white leading-[1.9] overflow-x-hidden">
+<div class="progress-bar" id="progress"></div>
+<!-- خلفية حية -->
+<div class="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
+  <div class="blob w-[520px] h-[520px] bg-success/25 dark:bg-success/20 -top-40 -right-32"></div>
+  <div class="blob w-[460px] h-[460px] bg-tint/30 dark:bg-appt/25 top-[40%] -left-40" style="animation-delay:-6s"></div>
+  <div class="blob w-[380px] h-[380px] bg-warning/20 dark:bg-warning/15 bottom-[-120px] right-[30%]" style="animation-delay:-12s"></div>
+  <div id="particles" class="absolute inset-0"></div>
+</div>
 <div class="max-w-6xl mx-auto px-5">
 
   <!-- الترويسة -->
   <header class="py-5 flex items-center justify-between gap-4">
     <div class="flex items-center gap-3 font-black text-xl">
-      <img src="assets/icon.png" alt="" class="w-10 h-10 rounded-xl">
+      <img src="assets/icon.png" alt="" class="w-10 h-10 rounded-xl pulse">
       جرعة
       <span class="text-[11px] font-semibold text-warning border border-warning rounded-md px-2">عرض المشروع</span>
     </div>
-    <a class="btn-primary" href="demo/index.html">▶ جرّب النموذج التفاعلي</a>
+    <a class="btn-primary hover:-translate-y-0.5 hover:shadow-lg hover:shadow-success/30" href="demo/index.html">▶ جرّب النموذج التفاعلي</a>
   </header>
 
   <!-- البطل -->
   <section class="grid md:grid-cols-[1.1fr_.9fr] gap-10 items-center py-12">
     <div>
-      <h1 class="text-4xl md:text-5xl font-black leading-[1.8] md:leading-[1.8]">كل جرعة في وقتها،<br>و<span class="text-success">أهلك مطمئنون</span> أينما كانوا</h1>
-      <p class="text-lg text-muted dark:text-mutedd mt-6 mb-8 leading-[1.9]">«جرعة» تطبيق عربي للتذكير بالأدوية والمواعيد الطبية، يقرأ رسائل «موعدي» و«وصفتي» تلقائياً، ويربط كل من يحتاج متابعة، كبيراً كان أو صغيراً أو مريض زهايمر، بمن يرعاه عبر وضع الرعاية.</p>
-      <div class="flex flex-wrap gap-3">
-        <a class="btn-primary" href="demo/index.html">▶ النموذج التفاعلي</a>
-        <a class="btn-ghost" href="DEMO_SCRIPT.md">سيناريو العرض</a>
+      <h1 class="reveal text-4xl md:text-5xl font-black leading-[1.8] md:leading-[1.8]">كل جرعة في وقتها،<br>و<span class="shine">أهلك مطمئنون</span> أينما كانوا</h1>
+      <p class="reveal text-lg text-muted dark:text-mutedd mt-6 mb-8 leading-[1.9]" style="transition-delay:.15s">«جرعة» تطبيق عربي للتذكير بالأدوية والمواعيد الطبية، يقرأ رسائل «موعدي» و«وصفتي» تلقائياً، ويربط كل من يحتاج متابعة، كبيراً كان أو صغيراً أو مريض زهايمر، بمن يرعاه عبر وضع الرعاية.</p>
+      <div class="reveal flex flex-wrap gap-3" style="transition-delay:.3s">
+        <a class="btn-primary pulse hover:-translate-y-0.5" href="demo/index.html">▶ النموذج التفاعلي</a>
+        <a class="btn-ghost hover:-translate-y-0.5" href="DEMO_SCRIPT.md">سيناريو العرض</a>
       </div>
-      <p class="mt-4 text-xs text-muted dark:text-mutedd bg-white dark:bg-card border border-dashed border-sep dark:border-sepd rounded-xl px-4 py-2.5">النموذج يعمل في المتصفح دون تثبيت. البيانات وهمية ولا تُحفظ. متوفر فعلياً على iOS وأندرويد وApple Watch.</p>
+      <p class="reveal mt-4 text-xs text-muted dark:text-mutedd bg-white dark:bg-card border border-dashed border-sep dark:border-sepd rounded-xl px-4 py-2.5">النموذج يعمل في المتصفح دون تثبيت. البيانات وهمية ولا تُحفظ. متوفر فعلياً على iOS وأندرويد وApple Watch.</p>
     </div>
-    <div id="frame" class="relative w-full max-w-[390px] mx-auto rounded-[30px] overflow-hidden shadow-2xl shadow-black/25 border border-sep dark:border-sepd bg-[#0A0F14]">
+    <div class="float reveal" style="transition-delay:.2s"><div id="frame" class="tilt relative w-full max-w-[390px] mx-auto rounded-[30px] overflow-hidden shadow-2xl shadow-black/25 border border-sep dark:border-sepd bg-[#0A0F14]">
       <iframe id="pf" src="demo/index.html" title="نموذج التطبيق" loading="lazy" class="absolute top-0 right-0 w-[390px] h-[844px] border-0 origin-top-right"></iframe>
-    </div>
+    </div></div>
   </section>
 
   <!-- أرقام -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-    <div class="card text-center"><b class="block text-3xl font-black text-primary dark:text-tint">٣</b><small class="text-muted dark:text-mutedd">منصات تعمل الآن: iOS · Android · Watch</small></div>
-    <div class="card text-center"><b class="block text-3xl font-black text-primary dark:text-tint">١٥+</b><small class="text-muted dark:text-mutedd">شاشة مكتملة في ٥ تدفقات</small></div>
-    <div class="card text-center"><b class="block text-3xl font-black text-primary dark:text-tint">١٠٠٪</b><small class="text-muted dark:text-mutedd">عربي بالاتجاه الصحيح وخط Cairo</small></div>
-    <div class="card text-center"><b class="block text-3xl font-black text-primary dark:text-tint">٠</b><small class="text-muted dark:text-mutedd">بيانات تغادر الجهاز في وضع الذكاء</small></div>
+  <div class="stagger grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+    <div class="card text-center"><b class="block text-3xl font-black text-primary dark:text-tint" data-count="3">٠</b><small class="text-muted dark:text-mutedd">منصات تعمل الآن: iOS · Android · Watch</small></div>
+    <div class="card text-center"><b class="block text-3xl font-black text-primary dark:text-tint" data-count="15" data-suffix="+">٠</b><small class="text-muted dark:text-mutedd">شاشة مكتملة في ٥ تدفقات</small></div>
+    <div class="card text-center"><b class="block text-3xl font-black text-primary dark:text-tint" data-count="100" data-suffix="٪">٠</b><small class="text-muted dark:text-mutedd">عربي بالاتجاه الصحيح وخط Cairo</small></div>
+    <div class="card text-center"><b class="block text-3xl font-black text-primary dark:text-tint" data-count="0">٠</b><small class="text-muted dark:text-mutedd">بيانات تغادر الجهاز في وضع الذكاء</small></div>
   </div>
 
   <!-- المشكلة -->
-  <section class="py-8">
-    <h2 class="h2">المشكلة</h2>
-    <p class="lead">المرضى المزمنون وكبار السن يفوّتون الجرعات، وأهلهم لا يعرفون إلا بعد المضاعفات.</p>
-    <div class="grid md:grid-cols-3 gap-4">
-      <div class="card border-r-4 !border-r-alert"><div class="text-3xl mb-2">💊</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">نصف المرضى لا يلتزمون</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">نسبة الالتزام بالأدوية المزمنة لا تتجاوز ٥٠٪ عالمياً، وتنخفض أكثر مع تعدد الأدوية وتقدم العمر.</p></div>
-      <div class="card border-r-4 !border-r-alert"><div class="text-3xl mb-2">📱</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">تطبيقات لا تفهم السوق</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">التطبيقات الحالية مترجمة، لا تقرأ رسائل المواعيد الرسمية، ولا تدعم الاتجاه العربي أو التقويم الهجري.</p></div>
-      <div class="card border-r-4 !border-r-alert"><div class="text-3xl mb-2">👵</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">من يحتاج متابعة يبقى وحده</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">أم تعيش مع الزهايمر، أب مسنّ في مدينة أخرى، أو طفل يأخذ دواءً مزمناً: لا طريقة لمعرفة أن الجرعة أُخذت أو أنه خرج من البيت.</p></div>
+  <section class="py-8 reveal">
+    <h2 class="h2 reveal">المشكلة</h2>
+    <p class="lead reveal">المرضى المزمنون وكبار السن يفوّتون الجرعات، وأهلهم لا يعرفون إلا بعد المضاعفات.</p>
+    <div class="stagger grid md:grid-cols-3 gap-4">
+      <div class="card lift border-r-4 !border-r-alert"><div class="text-3xl mb-2">💊</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">نصف المرضى لا يلتزمون</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">نسبة الالتزام بالأدوية المزمنة لا تتجاوز ٥٠٪ عالمياً، وتنخفض أكثر مع تعدد الأدوية وتقدم العمر.</p></div>
+      <div class="card lift border-r-4 !border-r-alert"><div class="text-3xl mb-2">📱</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">تطبيقات لا تفهم السوق</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">التطبيقات الحالية مترجمة، لا تقرأ رسائل المواعيد الرسمية، ولا تدعم الاتجاه العربي أو التقويم الهجري.</p></div>
+      <div class="card lift border-r-4 !border-r-alert"><div class="text-3xl mb-2">👵</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">من يحتاج متابعة يبقى وحده</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">أم تعيش مع الزهايمر، أب مسنّ في مدينة أخرى، أو طفل يأخذ دواءً مزمناً: لا طريقة لمعرفة أن الجرعة أُخذت أو أنه خرج من البيت.</p></div>
     </div>
   </section>
 
   <!-- الحل -->
-  <section class="py-8">
-    <h2 class="h2">الحل</h2>
-    <p class="lead">تطبيق واحد يربط ثلاثة أطراف: المريض، وأهله، وبياناته الصحية من الساعة والمستشفى.</p>
-    <div class="card relative mb-4 !border-2 !border-success bg-gradient-to-br from-success/10 to-transparent">
+  <section class="py-8 reveal">
+    <h2 class="h2 reveal">الحل</h2>
+    <p class="lead reveal">تطبيق واحد يربط ثلاثة أطراف: المريض، وأهله، وبياناته الصحية من الساعة والمستشفى.</p>
+    <div class="card lift reveal relative mb-4 !border-2 !border-success bg-gradient-to-br from-success/15 via-transparent to-tint/10 gradient-live">
       <span class="absolute -top-3 right-5 bg-success text-white text-xs font-bold px-3 py-0.5 rounded-lg">الميزة الأساسية</span>
       <div class="grid md:grid-cols-[auto_1fr] gap-5 items-center">
         <div class="text-5xl">🫶</div>
@@ -103,73 +138,106 @@ tailwind.config = {
         </div>
       </div>
     </div>
-    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-      <div class="card"><div class="text-3xl mb-2">⏰</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">تذكير ذكي بالعربية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">جدولة الأدوية مع تنبيه منطوق، تأجيل بلمسة، خصم تلقائي من المخزون، وتذكير بإعادة التعبئة.</p></div>
-      <div class="card"><div class="text-3xl mb-2">✉️</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">قراءة رسائل موعدي ووصفتي</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">الرسالة الرسمية تتحول تلقائياً إلى موعد في التقويم أو دواء في الجدول، على الجهاز دون رفع للسحابة.</p></div>
-      <div class="card"><div class="text-3xl mb-2">👨‍👩‍👧</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">شركاء الرعاية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">دعوة الأقارب برمز QR، صلاحيات محددة، سجل لحظي للجرعات، وتنبيه فوري عند التأخر.</p></div>
-      <div class="card"><div class="text-3xl mb-2">📍</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">النطاق الآمن</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">طوق أخضر حول المنزل وطوق أحمر للطوارئ. الخروج برفقة قريب لا يُطلق إنذاراً، والخروج وحده ينبّه الأهل بالموقع والبطارية.</p></div>
-      <div class="card"><div class="text-3xl mb-2">⌚</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">الصحة والساعة الذكية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">النبض والأكسجين وتخطيط القلب والنوم من Apple Watch وHealth Connect، وتطبيق مستقل على الساعة.</p></div>
-      <div class="card"><div class="text-3xl mb-2">✨</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">مساعد ذكي على الجهاز</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يكتشف أنماط التأخر ونقص المخزون ويقترح تعديلات، ويكيّف الواجهة تلقائياً لكبار السن.</p></div>
+    <div class="stagger grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div class="card lift"><div class="text-3xl mb-2">⏰</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">تذكير ذكي بالعربية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">جدولة الأدوية مع تنبيه منطوق، تأجيل بلمسة، خصم تلقائي من المخزون، وتذكير بإعادة التعبئة.</p></div>
+      <div class="card lift"><div class="text-3xl mb-2">✉️</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">قراءة رسائل موعدي ووصفتي</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">الرسالة الرسمية تتحول تلقائياً إلى موعد في التقويم أو دواء في الجدول، على الجهاز دون رفع للسحابة.</p></div>
+      <div class="card lift"><div class="text-3xl mb-2">👨‍👩‍👧</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">شركاء الرعاية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">دعوة الأقارب برمز QR، صلاحيات محددة، سجل لحظي للجرعات، وتنبيه فوري عند التأخر.</p></div>
+      <div class="card lift"><div class="text-3xl mb-2">📍</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">النطاق الآمن</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">طوق أخضر حول المنزل وطوق أحمر للطوارئ. الخروج برفقة قريب لا يُطلق إنذاراً، والخروج وحده ينبّه الأهل بالموقع والبطارية.</p></div>
+      <div class="card lift"><div class="text-3xl mb-2">⌚</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">الصحة والساعة الذكية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">النبض والأكسجين وتخطيط القلب والنوم من Apple Watch وHealth Connect، وتطبيق مستقل على الساعة.</p></div>
+      <div class="card lift"><div class="text-3xl mb-2">✨</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">مساعد ذكي على الجهاز</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يكتشف أنماط التأخر ونقص المخزون ويقترح تعديلات، ويكيّف الواجهة تلقائياً لكبار السن.</p></div>
     </div>
   </section>
 
   <!-- كيف يعمل -->
-  <section class="py-8">
-    <h2 class="h2">كيف يعمل</h2>
-    <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-      <div class="card relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">١</span><h3 class="font-extrabold mb-2 leading-[1.8]">يسجّل المريض أدويته</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يدوياً بمنتقي شكل الحبة، أو من رسالة وصفتي، أو من كتالوج الأدوية الذكي.</p></div>
-      <div class="card relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">٢</span><h3 class="font-extrabold mb-2 leading-[1.8]">يصل التذكير في وقته</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">على الهاتف والساعة، منطوقاً بالعربية، مع زر «تم» وزر «تأجيل».</p></div>
-      <div class="card relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">٣</span><h3 class="font-extrabold mb-2 leading-[1.8]">يرى الأهل ما يحدث</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">سجل رعاية لحظي، وتنبيه إن تأخرت الجرعة أو خرج المريض من النطاق الآمن.</p></div>
-      <div class="card relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">٤</span><h3 class="font-extrabold mb-2 leading-[1.8]">يتعلّم التطبيق</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يقترح تعديل الأوقات، يذكّر بالتعبئة، ويرفع تقريراً للطبيب في المراجعة.</p></div>
+  <section class="py-8 reveal">
+    <h2 class="h2 reveal">كيف يعمل</h2>
+    <div class="stagger grid sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+      <div class="card lift relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">١</span><h3 class="font-extrabold mb-2 leading-[1.8]">يسجّل المريض أدويته</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يدوياً بمنتقي شكل الحبة، أو من رسالة وصفتي، أو من كتالوج الأدوية الذكي.</p></div>
+      <div class="card lift relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">٢</span><h3 class="font-extrabold mb-2 leading-[1.8]">يصل التذكير في وقته</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">على الهاتف والساعة، منطوقاً بالعربية، مع زر «تم» وزر «تأجيل».</p></div>
+      <div class="card lift relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">٣</span><h3 class="font-extrabold mb-2 leading-[1.8]">يرى الأهل ما يحدث</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">سجل رعاية لحظي، وتنبيه إن تأخرت الجرعة أو خرج المريض من النطاق الآمن.</p></div>
+      <div class="card lift relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">٤</span><h3 class="font-extrabold mb-2 leading-[1.8]">يتعلّم التطبيق</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يقترح تعديل الأوقات، يذكّر بالتعبئة، ويرفع تقريراً للطبيب في المراجعة.</p></div>
     </div>
   </section>
 
   <!-- ما تم بناؤه -->
-  <section class="py-8">
-    <h2 class="h2">ما تم بناؤه فعلاً</h2>
-    <p class="lead">هذا ليس عرضاً لفكرة. هذه الأدوات مفعّلة الآن على iOS وأندرويد وApple Watch بقاعدة بيانات واحدة.</p>
-    <div class="flex flex-wrap gap-2.5">
-      <span class="chip">تسجيل الدخول بـ Apple وGoogle</span><span class="chip">وضع الرعاية والمتابعة</span><span class="chip">شركاء الرعاية بدعوة ورمز QR</span><span class="chip">النطاق الآمن وموقع المريض</span><span class="chip">تذكير الجرعات بتنبيه منطوق</span><span class="chip">صوت القريب وصورته بدل الرنة</span><span class="chip">تأجيل وتخطي وتأكيد من الإشعار</span><span class="chip">قراءة رسائل موعدي</span><span class="chip">استيراد الأدوية من وصفتي</span><span class="chip">التعرف الذكي على الدواء</span><span class="chip">كتالوج الأدوية والتفاعلات</span><span class="chip">مستشار الجدولة بخمس خطوات</span><span class="chip">المخزون وتذكير إعادة الصرف</span><span class="chip">التقويم الشهري ونسب الالتزام</span><span class="chip">المرفقات والتقارير الطبية</span><span class="chip">الملف الطبي</span><span class="chip">بطاقة التعريف الطبية</span><span class="chip">ملفات المستشفيات</span><span class="chip">التقييمات الصحية</span><span class="chip">لوحة الصحة من الساعة</span><span class="chip">تخطيط القلب والنبض والنوم</span><span class="chip">القياسات اليدوية</span><span class="chip">تذكير شرب الماء</span><span class="chip">المساعد الذكي والأنماط</span><span class="chip">تقرير الطبيب PDF</span><span class="chip">الحملات التوعوية</span><span class="chip">قفل البصمة وFace ID</span><span class="chip">النسخ الاحتياطي</span><span class="chip">تطبيق الساعة ومضاعفاتها</span><span class="chip">الوضع الداكن والفاتح</span>
+  <section class="py-8 reveal">
+    <h2 class="h2 reveal">ما تم بناؤه فعلاً</h2>
+    <p class="lead reveal">هذا ليس عرضاً لفكرة. هذه الأدوات مفعّلة الآن على iOS وأندرويد وApple Watch بقاعدة بيانات واحدة.</p>
+    <div class="stagger flex flex-wrap gap-2.5">
+      <span class="chip lift hover:bg-success/10 hover:text-success">تسجيل الدخول بـ Apple وGoogle</span><span class="chip lift hover:bg-success/10 hover:text-success">وضع الرعاية والمتابعة</span><span class="chip lift hover:bg-success/10 hover:text-success">شركاء الرعاية بدعوة ورمز QR</span><span class="chip lift hover:bg-success/10 hover:text-success">النطاق الآمن وموقع المريض</span><span class="chip lift hover:bg-success/10 hover:text-success">تذكير الجرعات بتنبيه منطوق</span><span class="chip lift hover:bg-success/10 hover:text-success">صوت القريب وصورته بدل الرنة</span><span class="chip lift hover:bg-success/10 hover:text-success">تأجيل وتخطي وتأكيد من الإشعار</span><span class="chip lift hover:bg-success/10 hover:text-success">قراءة رسائل موعدي</span><span class="chip lift hover:bg-success/10 hover:text-success">استيراد الأدوية من وصفتي</span><span class="chip lift hover:bg-success/10 hover:text-success">التعرف الذكي على الدواء</span><span class="chip lift hover:bg-success/10 hover:text-success">كتالوج الأدوية والتفاعلات</span><span class="chip lift hover:bg-success/10 hover:text-success">مستشار الجدولة بخمس خطوات</span><span class="chip lift hover:bg-success/10 hover:text-success">المخزون وتذكير إعادة الصرف</span><span class="chip lift hover:bg-success/10 hover:text-success">التقويم الشهري ونسب الالتزام</span><span class="chip lift hover:bg-success/10 hover:text-success">المرفقات والتقارير الطبية</span><span class="chip lift hover:bg-success/10 hover:text-success">الملف الطبي</span><span class="chip lift hover:bg-success/10 hover:text-success">بطاقة التعريف الطبية</span><span class="chip lift hover:bg-success/10 hover:text-success">ملفات المستشفيات</span><span class="chip lift hover:bg-success/10 hover:text-success">التقييمات الصحية</span><span class="chip lift hover:bg-success/10 hover:text-success">لوحة الصحة من الساعة</span><span class="chip lift hover:bg-success/10 hover:text-success">تخطيط القلب والنبض والنوم</span><span class="chip lift hover:bg-success/10 hover:text-success">القياسات اليدوية</span><span class="chip lift hover:bg-success/10 hover:text-success">تذكير شرب الماء</span><span class="chip lift hover:bg-success/10 hover:text-success">المساعد الذكي والأنماط</span><span class="chip lift hover:bg-success/10 hover:text-success">تقرير الطبيب PDF</span><span class="chip lift hover:bg-success/10 hover:text-success">الحملات التوعوية</span><span class="chip lift hover:bg-success/10 hover:text-success">قفل البصمة وFace ID</span><span class="chip lift hover:bg-success/10 hover:text-success">النسخ الاحتياطي</span><span class="chip lift hover:bg-success/10 hover:text-success">تطبيق الساعة ومضاعفاتها</span><span class="chip lift hover:bg-success/10 hover:text-success">الوضع الداكن والفاتح</span>
     </div>
   </section>
 
   <!-- الوكلاء -->
-  <section class="py-8">
-    <h2 class="h2">الوكلاء العاملون في التطبيق</h2>
-    <p class="lead">تسعة وكلاء يعملون على الجهاز، لكل واحد دور محدد وقواعد لا يتجاوزها. لا يشخّص أيٌّ منهم ولا يغيّر جرعة دون موافقة.</p>
-    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-      <div class="card"><div class="text-3xl mb-2">🫶</div><h3 class="font-extrabold mb-2 leading-[1.8]">وكيل الرعاية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يستمع لكلام المريض العفوي، يفهم نبرته وشكواه، يجيبه بصوت دافئ، ويبلغ العائلة بملخص مع التسجيل. يربط العرض بدواء أُخذ خلال الساعات الست الماضية، ويبلّغ فوراً بالموقع عند عرض عاجل.</p></div>
-      <div class="card"><div class="text-3xl mb-2">👨‍👩‍👧</div><h3 class="font-extrabold mb-2 leading-[1.8]">منسق العائلة</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">ينبّه الأقرب جغرافياً أولاً عند تأخر الجرعة، يسأل «من يرافقه للموعد؟» ويغلق البطاقة عند أول رد، يرسل نشرة مسائية، يوثّق من أعطى الدواء، ويدير لوحة مقدم الرعاية وأزرار الاستغاثة.</p></div>
-      <div class="card"><div class="text-3xl mb-2">⏰</div><h3 class="font-extrabold mb-2 leading-[1.8]">مجدول التذكيرات</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">تدرج ثلاثي: تمهيد قبل ١٥ دقيقة، التنبيه بصوت القريب في الموعد، ثم تنبيه مقدم الرعاية بعد ٣٠ دقيقة بلا تأكيد. يذكّر بالموعد قبل يوم و١٢ ساعة وساعتين، ويكشف الوصول للمستشفى تلقائياً.</p></div>
-      <div class="card"><div class="text-3xl mb-2">📍</div><h3 class="font-extrabold mb-2 leading-[1.8]">مراقب النطاق الآمن</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يميّز الخروج برفقة قريب عن الخروج وحده، ويقدّر الحركة والبطارية. الحذر مراقبة صامتة، والطوارئ فقط تُنبّه بصوت مع شاشة «طريقي إلى البيت» بصوت القريب.</p></div>
-      <div class="card"><div class="text-3xl mb-2">🗓</div><h3 class="font-extrabold mb-2 leading-[1.8]">محرك الجدولة الذكية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يقود إضافة الدواء بخمس خطوات، يربط كل جرعة بوجبة أو بالنوم مع سبب مفهوم، يباعد المضادات الحيوية، يكشف الدواء المكرر والتعارض الحرج ويجمّد الجدول حتى مراجعة الطبيب.</p></div>
-      <div class="card"><div class="text-3xl mb-2">🔎</div><h3 class="font-extrabold mb-2 leading-[1.8]">التعرف الذكي على الدواء</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يحوّل الاسم التجاري كما على العبوة إلى مادة فعالة وفئة. الكتالوج المحلي أولاً دون اتصال، ثم نموذج الجهاز، ثم قاعدة RxNorm. لا يتعلّم دواءً جديداً إلا بقبول المستخدم.</p></div>
-      <div class="card"><div class="text-3xl mb-2">✨</div><h3 class="font-extrabold mb-2 leading-[1.8]">مساعد الأنماط</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يحلل سلوك المريض مع الدواء على مدى أسابيع: الدواء الذي يُؤخذ متأخراً دائماً، وفترة اليوم الأكثر تفويتاً. يقترح إزاحة الجرعة أو توسيع النطاق، ولا يطبّق شيئاً دون موافقة.</p></div>
-      <div class="card"><div class="text-3xl mb-2">📄</div><h3 class="font-extrabold mb-2 leading-[1.8]">مُعدّ تقرير الطبيب</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يحوّل ما سجّلته العائلة والمريض خلال الشهور إلى تقرير من صفحة واحدة: الالتزام لكل دواء، الأعراض بعد الجرعات، القياسات وبيانات الساعة. عربي وإنجليزي وPDF قبل الموعد بيوم.</p></div>
-      <div class="card"><div class="text-3xl mb-2">💧</div><h3 class="font-extrabold mb-2 leading-[1.8]">مذكّر شرب الماء</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يوزّع التذكيرات على ساعات اليقظة بنصيحة توعوية، لا يزيد على سبعة في اليوم ولا يرسل أثناء النوم. الالتزام الضعيف يُحال إلى مساعد الأنماط.</p></div>
+  <section class="py-8 reveal">
+    <h2 class="h2 reveal">الوكلاء العاملون في التطبيق</h2>
+    <p class="lead reveal">تسعة وكلاء يعملون على الجهاز، لكل واحد دور محدد وقواعد لا يتجاوزها. لا يشخّص أيٌّ منهم ولا يغيّر جرعة دون موافقة.</p>
+    <div class="stagger grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div class="card lift"><div class="text-3xl mb-2">🫶</div><h3 class="font-extrabold mb-2 leading-[1.8]">وكيل الرعاية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يستمع لكلام المريض العفوي، يفهم نبرته وشكواه، يجيبه بصوت دافئ، ويبلغ العائلة بملخص مع التسجيل. يربط العرض بدواء أُخذ خلال الساعات الست الماضية، ويبلّغ فوراً بالموقع عند عرض عاجل.</p></div>
+      <div class="card lift"><div class="text-3xl mb-2">👨‍👩‍👧</div><h3 class="font-extrabold mb-2 leading-[1.8]">منسق العائلة</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">ينبّه الأقرب جغرافياً أولاً عند تأخر الجرعة، يسأل «من يرافقه للموعد؟» ويغلق البطاقة عند أول رد، يرسل نشرة مسائية، يوثّق من أعطى الدواء، ويدير لوحة مقدم الرعاية وأزرار الاستغاثة.</p></div>
+      <div class="card lift"><div class="text-3xl mb-2">⏰</div><h3 class="font-extrabold mb-2 leading-[1.8]">مجدول التذكيرات</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">تدرج ثلاثي: تمهيد قبل ١٥ دقيقة، التنبيه بصوت القريب في الموعد، ثم تنبيه مقدم الرعاية بعد ٣٠ دقيقة بلا تأكيد. يذكّر بالموعد قبل يوم و١٢ ساعة وساعتين، ويكشف الوصول للمستشفى تلقائياً.</p></div>
+      <div class="card lift"><div class="text-3xl mb-2">📍</div><h3 class="font-extrabold mb-2 leading-[1.8]">مراقب النطاق الآمن</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يميّز الخروج برفقة قريب عن الخروج وحده، ويقدّر الحركة والبطارية. الحذر مراقبة صامتة، والطوارئ فقط تُنبّه بصوت مع شاشة «طريقي إلى البيت» بصوت القريب.</p></div>
+      <div class="card lift"><div class="text-3xl mb-2">🗓</div><h3 class="font-extrabold mb-2 leading-[1.8]">محرك الجدولة الذكية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يقود إضافة الدواء بخمس خطوات، يربط كل جرعة بوجبة أو بالنوم مع سبب مفهوم، يباعد المضادات الحيوية، يكشف الدواء المكرر والتعارض الحرج ويجمّد الجدول حتى مراجعة الطبيب.</p></div>
+      <div class="card lift"><div class="text-3xl mb-2">🔎</div><h3 class="font-extrabold mb-2 leading-[1.8]">التعرف الذكي على الدواء</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يحوّل الاسم التجاري كما على العبوة إلى مادة فعالة وفئة. الكتالوج المحلي أولاً دون اتصال، ثم نموذج الجهاز، ثم قاعدة RxNorm. لا يتعلّم دواءً جديداً إلا بقبول المستخدم.</p></div>
+      <div class="card lift"><div class="text-3xl mb-2">✨</div><h3 class="font-extrabold mb-2 leading-[1.8]">مساعد الأنماط</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يحلل سلوك المريض مع الدواء على مدى أسابيع: الدواء الذي يُؤخذ متأخراً دائماً، وفترة اليوم الأكثر تفويتاً. يقترح إزاحة الجرعة أو توسيع النطاق، ولا يطبّق شيئاً دون موافقة.</p></div>
+      <div class="card lift"><div class="text-3xl mb-2">📄</div><h3 class="font-extrabold mb-2 leading-[1.8]">مُعدّ تقرير الطبيب</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يحوّل ما سجّلته العائلة والمريض خلال الشهور إلى تقرير من صفحة واحدة: الالتزام لكل دواء، الأعراض بعد الجرعات، القياسات وبيانات الساعة. عربي وإنجليزي وPDF قبل الموعد بيوم.</p></div>
+      <div class="card lift"><div class="text-3xl mb-2">💧</div><h3 class="font-extrabold mb-2 leading-[1.8]">مذكّر شرب الماء</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يوزّع التذكيرات على ساعات اليقظة بنصيحة توعوية، لا يزيد على سبعة في اليوم ولا يرسل أثناء النوم. الالتزام الضعيف يُحال إلى مساعد الأنماط.</p></div>
     </div>
   </section>
 
   <!-- خارطة الطريق -->
-  <section class="py-8">
-    <h2 class="h2">خارطة الطريق</h2>
-    <div class="grid md:grid-cols-3 gap-4 mt-4">
-      <div class="card"><h3 class="font-extrabold text-success mb-1">✓ منجز</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">iOS وأندرويد والساعة، وضع الرعاية، شركاء الرعاية، النطاق الآمن، قراءة الرسائل، الصحة، المساعد الذكي، البطاقة الطبية، التقييمات.</p></div>
-      <div class="card"><h3 class="font-extrabold text-warning mb-1">◐ الربع القادم</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">إطلاق تجريبي مع ٢٠٠ عائلة، الاشتراك العائلي، تقرير الطبيب PDF، تحسين كتالوج الأدوية السعودي.</p></div>
-      <div class="card"><h3 class="font-extrabold text-success mb-1">○ لاحقاً</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">تكامل مباشر مع منصات وزارة الصحة، نسخة دور الرعاية، توصيل الأدوية عبر شركاء الصيدليات.</p></div>
+  <section class="py-8 reveal">
+    <h2 class="h2 reveal">خارطة الطريق</h2>
+    <div class="stagger grid md:grid-cols-3 gap-4 mt-4">
+      <div class="card lift"><h3 class="font-extrabold text-success mb-1">✓ منجز</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">iOS وأندرويد والساعة، وضع الرعاية، شركاء الرعاية، النطاق الآمن، قراءة الرسائل، الصحة، المساعد الذكي، البطاقة الطبية، التقييمات.</p></div>
+      <div class="card lift"><h3 class="font-extrabold text-warning mb-1">◐ الربع القادم</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">إطلاق تجريبي مع ٢٠٠ عائلة، الاشتراك العائلي، تقرير الطبيب PDF، تحسين كتالوج الأدوية السعودي.</p></div>
+      <div class="card lift"><h3 class="font-extrabold text-success mb-1">○ لاحقاً</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">تكامل مباشر مع منصات وزارة الصحة، نسخة دور الرعاية، توصيل الأدوية عبر شركاء الصيدليات.</p></div>
     </div>
   </section>
 
   <!-- الطلب -->
-  <div class="my-8 mb-12 rounded-[28px] p-8 md:p-10 bg-gradient-to-br from-primary to-[#1B5A80] text-white grid md:grid-cols-[1fr_auto] gap-6 items-center">
+  <div class="reveal my-8 mb-12 rounded-[28px] p-8 md:p-10 bg-gradient-to-br from-primary via-[#1B5A80] to-success text-white gradient-live grid md:grid-cols-[1fr_auto] gap-6 items-center">
     <div><h2 class="h2 text-white">نبحث عن شريك للمرحلة التالية</h2><p class="opacity-85">التمويل سيُوجَّه إلى الإطلاق التجريبي، فريق الدعم، والتراخيص الصحية.</p></div>
-    <a class="btn bg-white text-primary hover:bg-ivory" href="demo/index.html">▶ شاهد النموذج</a>
+    <a class="btn bg-white text-primary hover:bg-ivory hover:-translate-y-0.5 hover:shadow-xl" href="demo/index.html">▶ شاهد النموذج</a>
   </div>
 
   <footer class="py-5 pb-10 text-sm text-muted dark:text-mutedd border-t border-sep dark:border-sepd">جرعة · Jor'ah — نموذج أولي للعرض. كل الأسماء والأرقام في النموذج وهمية.</footer>
 </div>
 
 <script>
+/* ---- الحركة ---- */
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+
+/* الظهور عند التمرير */
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
+document.querySelectorAll('.reveal, .stagger').forEach(el => io.observe(el));
+
+/* العدّادات */
+const cio = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return; cio.unobserve(e.target);
+  const el = e.target, target = +el.dataset.count, suffix = el.dataset.suffix || '';
+  if (reduce || target === 0) { el.textContent = ar(target) + suffix; return; }
+  const t0 = performance.now(), dur = 1400;
+  const tick = now => { const p = Math.min(1, (now - t0) / dur), v = Math.round(target * (1 - Math.pow(1 - p, 3))); el.textContent = ar(v) + suffix; if (p < 1) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+}), { threshold: .6 });
+document.querySelectorAll('[data-count]').forEach(el => cio.observe(el));
+
+/* شريط تقدم القراءة */
+const bar = document.getElementById('progress');
+addEventListener('scroll', () => { const h = document.documentElement; bar.style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + '%'; }, { passive: true });
+
+/* جزيئات خفيفة في الخلفية */
+if (!reduce) { const box = document.getElementById('particles'); for (let i = 0; i < 18; i++) { const d = document.createElement('i'); const sz = 4 + Math.random() * 8; d.className = 'particle'; d.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random() * 100}%;top:${100 + Math.random() * 100}%;animation-duration:${18 + Math.random() * 22}s;animation-delay:-${Math.random() * 30}s;opacity:${.25 + Math.random() * .4}`; box.appendChild(d); } }
+
+/* ميل الهاتف مع الفأرة */
+const tilt = document.getElementById('frame');
+if (!reduce && tilt && matchMedia('(hover:hover)').matches) {
+  tilt.addEventListener('mousemove', e => { const r = tilt.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; tilt.style.transform = `perspective(900px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg)`; });
+  tilt.addEventListener('mouseleave', () => { tilt.style.transform = ''; });
+}
+
 /* تصغير إطار الهاتف ليناسب عرض الحاوية */
 function fit(){const f=document.getElementById('frame'),i=document.getElementById('pf');const s=f.clientWidth/390;i.style.transform=`scale(${s})`;f.style.height=(844*s)+'px';}
 addEventListener('resize',fit);fit();
