@@ -1,5 +1,7 @@
 # jorah-prototype — النموذج الأولي للعرض والتجربة
 
+**الرابط العام:** https://asasky11.github.io/jorah-prototype/ — يُنشر تلقائياً من فرع `main` عبر GitHub Pages عند كل `git push`. النموذج التفاعلي وحده: https://asasky11.github.io/jorah-prototype/demo/
+
 مجلد مستقل خارج مستودع التطبيق: `/Users/abdullah/Desktop/devloper/jorah-prototype`. كل تطويرات العرض والنموذج التفاعلي تُضاف هنا، لا في مجلد التطبيق.
 
 مجلد مستقل تماماً عن كود التطبيق، مخصص لعرض «جرعة» على المستثمرين والمستخدمين التجريبيين
