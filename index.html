@@ -3,244 +3,397 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>جرعة — عرض المشروع</title>
+<title>جرعة | Jor'ah — تذكير بالأدوية والمواعيد ورعاية تربط المريض بعائلته</title>
+<meta name="description" content="جرعة تطبيق عربي للتذكير بالأدوية والمواعيد الطبية مع وضع مبسّط لكبار السن ومرضى الزهايمر، يربط المريض بشركاء الرعاية من العائلة. جرّب النموذج التفاعلي في المتصفح.">
 <link rel="icon" href="assets/icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com/3.4.1"></script>
-<script>
-/* ألوان جرعة كما في DESIGN.md و theme.ts */
-tailwind.config = {
-  darkMode: 'media',
-  theme: {
-    extend: {
-      fontFamily: { cairo: ['Cairo', 'system-ui', 'sans-serif'] },
-      colors: {
-        primary: '#0E3A5A', success: '#2D8A6B', alert: '#D9534F', warning: '#D99B26', appt: '#3B6E9E',
-        ivory: '#F7F9FA', night: '#121B22', card: '#1A2228', sep: '#E2E8F0', sepd: '#1E293B',
-        ink: '#0E3A5A', muted: '#5B6B78', mutedd: '#94A3B8', tint: '#8CC4E8',
-      },
-      borderRadius: { '2.5xl': '1.25rem' },
-    },
-  },
-};
-</script>
-<style type="text/tailwindcss">
-  @layer base {
-    h1, h2, h3 { line-height: 1.8; }
-    p, li, small { @apply leading-[1.9]; }
-  }
-  /* ---- الحركة والمؤثرات ---- */
-  @keyframes blob { 0%,100%{ transform:translate(0,0) scale(1); } 33%{ transform:translate(40px,-30px) scale(1.1); } 66%{ transform:translate(-30px,25px) scale(.95); } }
-  @keyframes floaty { 0%,100%{ transform:translateY(0) rotate(-1deg); } 50%{ transform:translateY(-14px) rotate(1deg); } }
-  @keyframes shimmer { to { background-position: 200% center; } }
-  @keyframes pulse-ring { 0%{ box-shadow:0 0 0 0 rgba(45,138,107,.45); } 70%{ box-shadow:0 0 0 16px rgba(45,138,107,0); } 100%{ box-shadow:0 0 0 0 rgba(45,138,107,0); } }
-  @keyframes gradient-shift { 0%{ background-position:0% 50%; } 50%{ background-position:100% 50%; } 100%{ background-position:0% 50%; } }
-  @keyframes drift { from { transform:translateY(0); } to { transform:translateY(-100vh); } }
-  .blob { @apply absolute rounded-full blur-3xl pointer-events-none; animation: blob 18s ease-in-out infinite; }
-  .float { animation: floaty 6s ease-in-out infinite; }
-  .shine { background: linear-gradient(90deg, #2D8A6B 0%, #8CC4E8 40%, #2D8A6B 60%, #D99B26 100%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 5s linear infinite; }
-  .pulse { animation: pulse-ring 2.4s ease-out infinite; }
-  .gradient-live { background-size: 200% 200%; animation: gradient-shift 10s ease infinite; }
-  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1); }
-  .reveal.in { opacity: 1; transform: none; }
-  .stagger > * { opacity: 0; transform: translateY(22px); transition: opacity .6s cubic-bezier(.2,.8,.2,1), transform .6s cubic-bezier(.2,.8,.2,1); }
-  .stagger.in > * { opacity: 1; transform: none; }
-  .stagger.in > *:nth-child(2){ transition-delay:.08s } .stagger.in > *:nth-child(3){ transition-delay:.16s } .stagger.in > *:nth-child(4){ transition-delay:.24s } .stagger.in > *:nth-child(5){ transition-delay:.32s } .stagger.in > *:nth-child(6){ transition-delay:.40s } .stagger.in > *:nth-child(7){ transition-delay:.48s } .stagger.in > *:nth-child(8){ transition-delay:.56s } .stagger.in > *:nth-child(9){ transition-delay:.64s } .stagger.in > *:nth-child(n+10){ transition-delay:.7s }
-  .lift { @apply transition-all duration-300; }
-  .lift:hover { transform: translateY(-6px); box-shadow: 0 18px 40px -12px rgba(14,58,90,.28); border-color: rgba(45,138,107,.45); }
-  .tilt { transition: transform .25s ease; transform-style: preserve-3d; }
-  .particle { @apply absolute rounded-full pointer-events-none; background: rgba(45,138,107,.35); animation: drift linear infinite; }
-  .progress-bar { position: fixed; top: 0; right: 0; height: 3px; width: 0; background: linear-gradient(90deg,#2D8A6B,#8CC4E8); z-index: 100; transition: width .1s linear; }
-  @media (prefers-reduced-motion: reduce) {
-    .blob, .float, .shine, .pulse, .gradient-live, .particle { animation: none !important; }
-    .reveal, .stagger > * { opacity: 1 !important; transform: none !important; transition: none !important; }
-    .lift:hover, .tilt { transform: none !important; }
-  }
-  @layer components {
-    .card { @apply bg-white dark:bg-card border border-sep dark:border-sepd rounded-2.5xl p-6; }
-    .btn { @apply inline-flex items-center gap-2 rounded-2xl px-6 py-3 font-bold no-underline transition active:scale-[.98]; }
-    .btn-primary { @apply btn bg-success text-white hover:bg-[#27795e]; }
-    .btn-ghost { @apply btn bg-transparent text-ink dark:text-white border border-sep dark:border-sepd hover:bg-black/5 dark:hover:bg-white/5; }
-    .h2 { @apply text-3xl font-black mb-3 leading-[1.8]; }
-    .lead { @apply text-muted dark:text-mutedd mb-7 max-w-2xl text-[17px] leading-[1.9]; }
-    .chip { @apply bg-white dark:bg-card border border-sep dark:border-sepd rounded-xl px-4 py-1.5 text-sm font-semibold; }
-  }
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#0E3A5A; --green:#2D8A6B; --coral:#D9534F; --gold:#D99B26; --appt:#3B6E9E; --tint:#8CC4E8;
+  --bg:#F7F9FA; --card:#FFFFFF; --ink:#0E3A5A; --muted:#5B6B78; --sep:#E2E8F0; --soft:#EEF2F5;
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;font-family:'Cairo',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.9;font-size:16px;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{line-height:1.7;margin:0}
+p{margin:0}
+a{color:inherit}
+img{max-width:100%}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* خلفية حية هادئة */
+.bgart{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.bgart i{position:absolute;border-radius:50%;filter:blur(80px);opacity:.28;animation:blob 22s ease-in-out infinite}
+@keyframes blob{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.08)}66%{transform:translate(-30px,25px) scale(.95)}}
+
+/* الترويسة */
+header{position:sticky;top:0;z-index:50;background:rgba(247,249,250,.78);backdrop-filter:blur(16px);border-bottom:1px solid rgba(14,58,90,.06)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:68px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:20px;text-decoration:none}
+.brand img{width:40px;height:40px;border-radius:12px}
+.brand small{font-weight:600;font-size:12px;color:var(--muted)}
+nav.links{display:flex;gap:22px;font-weight:700;font-size:14.5px}
+nav.links a{text-decoration:none;color:var(--muted)} nav.links a:hover{color:var(--green)}
+@media (max-width:860px){nav.links{display:none}}
+
+/* الأزرار */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:50px;padding:0 22px;border-radius:999px;font-weight:800;text-decoration:none;transition:.2s;border:0;cursor:pointer;font-family:inherit;font-size:16px}
+.btn:hover{transform:translateY(-2px)}
+.btn-g{background:var(--green);color:#fff;box-shadow:0 10px 24px -10px rgba(45,138,107,.6)}
+.btn-p{background:var(--primary);color:#fff}
+.btn-o{background:transparent;border:1.5px solid var(--sep);color:var(--primary)}
+.btn-w{background:#fff;color:var(--primary)}
+.btn-sm{height:42px;padding:0 16px;font-size:14.5px}
+
+/* البطل */
+.hero{padding:56px 0 30px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+@media (max-width:860px){.hero{grid-template-columns:1fr;padding-top:36px}}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(45,138,107,.12);color:var(--green);font-weight:800;font-size:13.5px;border-radius:999px;padding:4px 14px;margin-bottom:16px}
+.hero h1{font-size:clamp(30px,4.6vw,50px);font-weight:900;line-height:1.75}
+.hero h1 span{color:var(--green)}
+.hero .lead{font-size:18px;color:var(--muted);margin:18px 0 26px;max-width:560px}
+.cta{display:flex;flex-wrap:wrap;gap:12px}
+.note{margin-top:16px;font-size:13px;color:var(--muted);background:#fff;border:1px dashed var(--sep);border-radius:12px;padding:8px 14px;display:inline-block}
+.phone-wrap{display:flex;justify-content:center}
+.frame{position:relative;width:100%;max-width:380px;border-radius:44px;overflow:hidden;background:#0A0F14;box-shadow:0 40px 80px -30px rgba(14,58,90,.5),inset 0 0 0 2px #2a333b;padding:10px;animation:floaty 7s ease-in-out infinite}
+.frame .inner{border-radius:36px;overflow:hidden;position:relative;background:#F7F9FA}
+.frame iframe{position:absolute;top:0;right:0;width:390px;height:844px;border:0;transform-origin:top right}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.frame-hint{text-align:center;color:var(--muted);font-size:13.5px;margin-top:12px;font-weight:600}
+
+/* أرقام */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:34px 0 10px}
+@media (max-width:860px){.stats{grid-template-columns:1fr 1fr}}
+.stat{background:var(--card);border:1px solid var(--sep);border-radius:18px;padding:18px;text-align:center}
+.stat b{display:block;font-size:30px;font-weight:900;color:var(--primary);line-height:1.3}
+.stat small{color:var(--muted);font-size:13.5px}
+
+/* الأقسام */
+section{padding:56px 0}
+.sec-h{margin-bottom:26px;max-width:720px}
+.sec-h .k{color:var(--green);font-weight:800;font-size:14px;letter-spacing:.3px}
+.sec-h h2{font-size:clamp(26px,3.4vw,36px);font-weight:900}
+.sec-h p{color:var(--muted);font-size:17px;margin-top:10px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:860px){.g2,.g3,.g4{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--sep);border-radius:20px;padding:22px;transition:.25s;position:relative}
+.card:hover{transform:translateY(-5px);box-shadow:0 24px 40px -24px rgba(14,58,90,.35);border-color:rgba(45,138,107,.35)}
+.card h3{font-size:18px;font-weight:800;margin:12px 0 6px}
+.card p{color:var(--muted);font-size:14.5px;line-height:1.85}
+.icbox{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;color:#fff}
+.icbox.g{background:var(--green)} .icbox.pr{background:var(--primary)} .icbox.c{background:var(--coral)} .icbox.y{background:var(--gold)} .icbox.b{background:var(--appt)}
+.soft-g{background:rgba(45,138,107,.13);color:var(--green)} .soft-p{background:rgba(14,58,90,.1);color:var(--primary)} .soft-c{background:rgba(217,83,79,.13);color:var(--coral)} .soft-y{background:rgba(217,155,38,.16);color:var(--gold)} .soft-b{background:rgba(59,110,158,.13);color:var(--appt)}
+.badge{position:absolute;top:-12px;right:20px;background:var(--green);color:#fff;font-size:12.5px;font-weight:800;padding:2px 12px;border-radius:999px}
+
+/* الفكرة */
+.idea{display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:start}
+@media (max-width:860px){.idea{grid-template-columns:1fr}}
+.idea .big{font-size:19px;line-height:2}
+.idea .big strong{color:var(--green)}
+.principle{background:var(--primary);color:#fff;border-radius:22px;padding:24px}
+.principle h3{font-size:18px;font-weight:800;color:#fff;margin-bottom:8px}
+.principle p{color:rgba(255,255,255,.85);font-size:14.5px}
+.swatches{display:flex;gap:8px;margin-top:14px}
+.swatches i{flex:1;height:36px;border-radius:10px;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;font-style:normal}
+.feat{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--sep)}
+.feat:last-child{border-bottom:0}
+.feat b{display:block;font-size:16px} .feat p{font-size:14.5px}
+
+/* الرسالة */
+.quote{background:linear-gradient(135deg,var(--primary),#1B5A80 60%,var(--green));color:#fff;border-radius:28px;padding:40px 28px;text-align:center;margin-bottom:24px}
+.quote h3{font-size:clamp(22px,3vw,30px);font-weight:900;line-height:1.8;color:#fff}
+.quote p{color:rgba(255,255,255,.85);margin-top:10px;max-width:760px;margin-inline:auto;font-size:16px}
+.values .card{border-top:4px solid var(--green)}
+.values .card:nth-child(2){border-top-color:var(--primary)} .values .card:nth-child(3){border-top-color:var(--gold)} .values .card:nth-child(4){border-top-color:var(--coral)}
+
+/* الخدمات */
+.svc{border-right:4px solid var(--green)}
+.svc .who{display:inline-block;font-size:12.5px;font-weight:800;color:var(--green);background:rgba(45,138,107,.12);border-radius:999px;padding:1px 10px;margin-bottom:8px}
+.svc ul{list-style:none;padding:0;margin:8px 0 0}
+.svc li{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--sep);font-size:14.5px}
+.svc li:last-child{border-bottom:0}
+.svc li b{color:var(--ink)} .svc li span{color:var(--muted)}
+.svc li .ic{width:18px;height:18px;margin-top:6px;color:var(--green)}
+.svc.b{border-right-color:var(--appt)} .svc.b .who{color:var(--appt);background:rgba(59,110,158,.12)} .svc.b li .ic{color:var(--appt)}
+.svc.y{border-right-color:var(--gold)} .svc.y .who{color:var(--gold);background:rgba(217,155,38,.16)} .svc.y li .ic{color:var(--gold)}
+.svc.c{border-right-color:var(--coral)} .svc.c .who{color:var(--coral);background:rgba(217,83,79,.13)} .svc.c li .ic{color:var(--coral)}
+.svc.p{border-right-color:var(--primary)} .svc.p .who{color:var(--primary);background:rgba(14,58,90,.1)} .svc.p li .ic{color:var(--primary)}
+.try{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-weight:800;font-size:14px;color:var(--green);text-decoration:none}
+
+/* كيف يعمل */
+.steps{counter-reset:s}
+.steps .card{padding-top:30px}
+.steps .num{position:absolute;top:-16px;right:20px;width:34px;height:34px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:900}
+
+/* الأثر */
+.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--sep);border-radius:20px;overflow:hidden;font-size:14.5px}
+.table th,.table td{padding:14px 16px;text-align:right;vertical-align:top;border-bottom:1px solid var(--sep)}
+.table th{background:var(--soft);font-weight:800;font-size:14px}
+.table tr:last-child td{border-bottom:0}
+.table td:first-child{color:var(--coral)} .table td:nth-child(2){color:var(--ink);font-weight:700} .table td:last-child{color:var(--green)}
+@media (max-width:640px){.table{display:block;overflow-x:auto;white-space:nowrap}}
+.impact .card{display:flex;gap:14px;align-items:flex-start}
+.impact .card h3{margin-top:0}
+.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}
+@media (max-width:860px){.kpi{grid-template-columns:1fr 1fr}}
+.kpi div{background:var(--soft);border-radius:16px;padding:14px;text-align:center;font-size:14px;font-weight:700}
+.kpi div small{display:block;font-weight:600;color:var(--muted);font-size:12.5px}
+
+/* المنصات */
+.plat{display:flex;flex-wrap:wrap;gap:10px}
+.plat span{background:#fff;border:1px solid var(--sep);border-radius:999px;padding:6px 16px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:8px}
+
+/* الخاتمة */
+.final{background:linear-gradient(135deg,var(--primary),#1B5A80 55%,var(--green));color:#fff;border-radius:30px;padding:44px 28px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;margin:20px 0 40px}
+@media (max-width:860px){.final{grid-template-columns:1fr}}
+.final h2{font-size:clamp(24px,3.2vw,34px);font-weight:900;color:#fff}
+.final p{color:rgba(255,255,255,.85)}
+footer{border-top:1px solid var(--sep);padding:20px 0 40px;color:var(--muted);font-size:13.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+/* الظهور عند التمرير */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.2,.8,.2,1),transform .7s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+.grid.rv>*{opacity:0;transform:translateY(18px);transition:.6s cubic-bezier(.2,.8,.2,1)}
+.grid.rv.in>*{opacity:1;transform:none}
+.grid.rv.in>*:nth-child(2){transition-delay:.08s}.grid.rv.in>*:nth-child(3){transition-delay:.16s}.grid.rv.in>*:nth-child(4){transition-delay:.24s}.grid.rv.in>*:nth-child(5){transition-delay:.32s}.grid.rv.in>*:nth-child(n+6){transition-delay:.4s}
+.progress{position:fixed;top:0;right:0;height:3px;width:0;background:linear-gradient(90deg,var(--green),var(--tint));z-index:100}
+@media (prefers-reduced-motion:reduce){.rv,.grid.rv>*{opacity:1!important;transform:none!important;transition:none!important}.frame,.bgart i{animation:none!important}}
 </style>
 </head>
-<body class="font-cairo bg-ivory text-ink dark:bg-night dark:text-white leading-[1.9] overflow-x-hidden">
-<div class="progress-bar" id="progress"></div>
-<!-- خلفية حية -->
-<div class="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
-  <div class="blob w-[520px] h-[520px] bg-success/25 dark:bg-success/20 -top-40 -right-32"></div>
-  <div class="blob w-[460px] h-[460px] bg-tint/30 dark:bg-appt/25 top-[40%] -left-40" style="animation-delay:-6s"></div>
-  <div class="blob w-[380px] h-[380px] bg-warning/20 dark:bg-warning/15 bottom-[-120px] right-[30%]" style="animation-delay:-12s"></div>
-  <div id="particles" class="absolute inset-0"></div>
+<body>
+<div class="progress" id="progress"></div>
+<div class="bgart" aria-hidden="true">
+  <i style="width:540px;height:540px;background:var(--green);top:-180px;right:-140px"></i>
+  <i style="width:480px;height:480px;background:var(--tint);top:40%;left:-180px;animation-delay:-7s"></i>
+  <i style="width:400px;height:400px;background:var(--gold);bottom:-140px;right:30%;animation-delay:-13s"></i>
 </div>
-<div class="max-w-6xl mx-auto px-5">
 
-  <!-- الترويسة -->
-  <header class="py-5 flex items-center justify-between gap-4">
-    <div class="flex items-center gap-3 font-black text-xl">
-      <img src="assets/icon.png" alt="" class="w-10 h-10 rounded-xl pulse">
-      جرعة
-      <span class="text-[11px] font-semibold text-warning border border-warning rounded-md px-2">عرض المشروع</span>
-    </div>
-    <a class="btn-primary hover:-translate-y-0.5 hover:shadow-lg hover:shadow-success/30" href="demo/index.html">▶ جرّب النموذج التفاعلي</a>
-  </header>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-pill" viewBox="0 0 24 24"><path d="M10.5 20.5 20.5 10.5a4.95 4.95 0 0 0-7-7l-10 10a4.95 4.95 0 0 0 7 7z"/><path d="m8.5 8.5 7 7"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0 1 14 0"/><circle cx="17" cy="9" r="3"/><path d="M16 16a6 6 0 0 1 6 5"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24"><path d="M9.5 3a2.5 2.5 0 0 0-2.5 2.5V6a3 3 0 0 0-2 5.2 3 3 0 0 0 1 5.8 2.5 2.5 0 0 0 4.5 1.5V3zM14.5 3a2.5 2.5 0 0 1 2.5 2.5V6a3 3 0 0 1 2 5.2 3 3 0 0 1-1 5.8 2.5 2.5 0 0 1-4.5 1.5V3z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+  <symbol id="i-steth" viewBox="0 0 24 24"><path d="M4 3v6a5 5 0 0 0 10 0V3"/><path d="M9 14v2a5 5 0 0 0 10 0v-1"/><circle cx="19" cy="12" r="2"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-7 7-12a7 7 0 0 0-14 0c0 5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+  <symbol id="i-watch" viewBox="0 0 24 24"><rect x="6" y="7" width="12" height="10" rx="3"/><path d="M9 7V3h6v4M9 17v4h6v-4M12 10v3h2"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 4v16l13-8z"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21s-8-5.3-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.7-8 11-8 11z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 2.5s-7 7.5-7 12a7 7 0 0 0 14 0c0-4.5-7-12-7-12z"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 17l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+</defs></svg>
 
+<header>
+  <div class="wrap">
+    <a class="brand" href="#"><img src="assets/icon.png" alt="شعار جرعة">جرعة <small>Jor'ah</small></a>
+    <nav class="links"><a href="#idea">الفكرة</a><a href="#mission">الرسالة</a><a href="#services">الخدمات</a><a href="#impact">الأثر</a><a href="#how">كيف يعمل</a></nav>
+    <a class="btn btn-g btn-sm" href="demo/index.html"><svg class="ic" style="width:16px;height:16px;fill:currentColor;stroke:none"><use href="#i-play"/></svg> جرّب التطبيق</a>
+  </div>
+</header>
+
+<main class="wrap">
   <!-- البطل -->
-  <section class="grid md:grid-cols-[1.1fr_.9fr] gap-10 items-center py-12">
+  <section class="hero">
     <div>
-      <h1 class="reveal text-4xl md:text-5xl font-black leading-[1.8] md:leading-[1.8]">كل جرعة في وقتها،<br>و<span class="shine">أهلك مطمئنون</span> أينما كانوا</h1>
-      <p class="reveal text-lg text-muted dark:text-mutedd mt-6 mb-8 leading-[1.9]" style="transition-delay:.15s">«جرعة» تطبيق عربي للتذكير بالأدوية والمواعيد الطبية، يقرأ رسائل «موعدي» و«وصفتي» تلقائياً، ويربط كل من يحتاج متابعة، كبيراً كان أو صغيراً أو مريض زهايمر، بمن يرعاه عبر وضع الرعاية.</p>
-      <div class="reveal flex flex-wrap gap-3" style="transition-delay:.3s">
-        <a class="btn-primary pulse hover:-translate-y-0.5" href="demo/index.html">▶ النموذج التفاعلي</a>
-        <a class="btn-ghost hover:-translate-y-0.5" href="DEMO_SCRIPT.md">سيناريو العرض</a>
+      <span class="eyebrow rv"><svg class="ic" style="width:16px;height:16px"><use href="#i-heart"/></svg> تطبيق عربي لتذكير الأدوية والمواعيد ورعاية العائلة</span>
+      <h1 class="rv">كل جرعة في وقتها،<br>و<span>أهلك مطمئنون</span> أينما كانوا</h1>
+      <p class="lead rv" style="transition-delay:.12s">«جرعة» يذكّر المريض بأدويته ومواعيده الطبية، ويقرأ رسائل «موعدي» و«وصفتي» تلقائياً، ويمنح كبار السن ومرضى الزهايمر وضعاً مبسّطاً، ويربطهم بمن يرعاهم من العائلة لحظةً بلحظة.</p>
+      <div class="cta rv" style="transition-delay:.24s">
+        <a class="btn btn-g" href="demo/index.html"><svg class="ic" style="width:18px;height:18px;fill:currentColor;stroke:none"><use href="#i-play"/></svg> جرّب النموذج التفاعلي</a>
+        <a class="btn btn-o" href="#services">تعرّف على الخدمات</a>
       </div>
-      <p class="reveal mt-4 text-xs text-muted dark:text-mutedd bg-white dark:bg-card border border-dashed border-sep dark:border-sepd rounded-xl px-4 py-2.5">النموذج يعمل في المتصفح دون تثبيت. البيانات وهمية ولا تُحفظ. متوفر فعلياً على iOS وأندرويد وApple Watch.</p>
+      <p class="note rv" style="transition-delay:.3s">النموذج يعمل في المتصفح دون تثبيت. البيانات وهمية ولا تُحفظ. التطبيق الفعلي متوفر على iPhone وأندرويد وApple Watch.</p>
     </div>
-    <div class="float reveal" style="transition-delay:.2s"><div id="frame" class="tilt relative w-full max-w-[390px] mx-auto rounded-[30px] overflow-hidden shadow-2xl shadow-black/25 border border-sep dark:border-sepd bg-[#0A0F14]">
-      <iframe id="pf" src="demo/index.html" title="نموذج التطبيق" loading="lazy" class="absolute top-0 right-0 w-[390px] h-[844px] border-0 origin-top-right"></iframe>
-    </div></div>
+    <div class="phone-wrap rv" style="transition-delay:.15s">
+      <div>
+        <div class="frame" id="frame"><div class="inner" id="inner"><iframe id="pf" src="demo/index.html" title="نموذج تطبيق جرعة" loading="lazy"></iframe></div></div>
+        <div class="frame-hint">النموذج أعلاه قابل للنقر: جرّب «تم التناول» أو زر (+)</div>
+      </div>
+    </div>
   </section>
 
-  <!-- أرقام -->
-  <div class="stagger grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-    <div class="card text-center"><b class="block text-3xl font-black text-primary dark:text-tint" data-count="3">٠</b><small class="text-muted dark:text-mutedd">منصات تعمل الآن: iOS · Android · Watch</small></div>
-    <div class="card text-center"><b class="block text-3xl font-black text-primary dark:text-tint" data-count="15" data-suffix="+">٠</b><small class="text-muted dark:text-mutedd">شاشة مكتملة في ٥ تدفقات</small></div>
-    <div class="card text-center"><b class="block text-3xl font-black text-primary dark:text-tint" data-count="100" data-suffix="٪">٠</b><small class="text-muted dark:text-mutedd">عربي بالاتجاه الصحيح وخط Cairo</small></div>
-    <div class="card text-center"><b class="block text-3xl font-black text-primary dark:text-tint" data-count="0">٠</b><small class="text-muted dark:text-mutedd">بيانات تغادر الجهاز في وضع الذكاء</small></div>
+  <div class="stats grid rv">
+    <div class="stat"><b data-count="3">0</b><small>منصات على حساب واحد: iPhone · أندرويد · Apple Watch</small></div>
+    <div class="stat"><b data-count="5">0</b><small>دوائر خدمات: الدواء، المواعيد، العائلة، السلامة، الطبيب</small></div>
+    <div class="stat"><b data-count="9">0</b><small>وكلاء ذكيون متخصصون يعملون على الجهاز</small></div>
+    <div class="stat"><b data-count="1">0</b><small>نقرة واحدة تفعّل الوضع المبسّط لكبار السن والزهايمر</small></div>
   </div>
 
-  <!-- المشكلة -->
-  <section class="py-8 reveal">
-    <h2 class="h2 reveal">المشكلة</h2>
-    <p class="lead reveal">المرضى المزمنون وكبار السن يفوّتون الجرعات، وأهلهم لا يعرفون إلا بعد المضاعفات.</p>
-    <div class="stagger grid md:grid-cols-3 gap-4">
-      <div class="card lift border-r-4 !border-r-alert"><div class="text-3xl mb-2">💊</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">نصف المرضى لا يلتزمون</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">نسبة الالتزام بالأدوية المزمنة لا تتجاوز ٥٠٪ عالمياً، وتنخفض أكثر مع تعدد الأدوية وتقدم العمر.</p></div>
-      <div class="card lift border-r-4 !border-r-alert"><div class="text-3xl mb-2">📱</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">تطبيقات لا تفهم السوق</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">التطبيقات الحالية مترجمة، لا تقرأ رسائل المواعيد الرسمية، ولا تدعم الاتجاه العربي أو التقويم الهجري.</p></div>
-      <div class="card lift border-r-4 !border-r-alert"><div class="text-3xl mb-2">👵</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">من يحتاج متابعة يبقى وحده</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">أم تعيش مع الزهايمر، أب مسنّ في مدينة أخرى، أو طفل يأخذ دواءً مزمناً: لا طريقة لمعرفة أن الجرعة أُخذت أو أنه خرج من البيت.</p></div>
+  <!-- الفكرة -->
+  <section id="idea">
+    <div class="sec-h rv"><div class="k">أولاً</div><h2>الفكرة</h2><p>يبدأ «جرعة» من مشكلة يومية يعيشها ملايين المرضى وعائلاتهم: دواء يُنسى، وموعد يفوت، وقريب يقلق ولا يعرف إن كان والده أخذ حبّة الضغط هذا الصباح أم لا.</p></div>
+    <div class="idea">
+      <div class="rv">
+        <p class="big">التطبيق تذكير ذكي بالأدوية والمواعيد الطبية، لكنه يتجاوز المنبّه التقليدي ليصبح <strong>منظومة رعاية مصغّرة</strong> تجمع المريض ومقدّم الرعاية وطبيبه في مكان واحد. الفئة المستهدفة: المرضى عموماً، مع عناية خاصة بكبار السن ومرضى الزهايمر وذوي الأمراض المزمنة، وأفراد العائلة الذين يتولّون رعايتهم.</p>
+        <div style="margin-top:18px">
+          <div class="feat"><div class="icbox soft-p"><svg class="ic"><use href="#i-brain"/></svg></div><div><b>وضع مبسّط لكبار السن والزهايمر</b><p>واجهة مكبّرة وهادئة، أزرار أكبر، صورة الدواء بحجم كبير، وتذكير بصوت القريب، تُفعَّل بنقرة واحدة دون تغيير التطبيق.</p></div></div>
+          <div class="feat"><div class="icbox soft-g"><svg class="ic"><use href="#i-users"/></svg></div><div><b>شركاء الرعاية</b><p>دعوة الأبناء والأقارب برابط آمن أو رمز QR، مع صلاحيات محددة لكل مرافق ومزامنة لحظية لكل جرعة وموعد.</p></div></div>
+          <div class="feat"><div class="icbox soft-b"><svg class="ic"><use href="#i-mail"/></svg></div><div><b>مدمج مع الواقع السعودي</b><p>قراءة رسائل «موعدي» و«وصفتي» وإضافة المواعيد والأدوية تلقائياً، وكتالوج أدوية مبني على بيانات هيئة الغذاء والدواء.</p></div></div>
+          <div class="feat"><div class="icbox soft-y"><svg class="ic"><use href="#i-sparkle"/></svg></div><div><b>وكلاء ذكيون متخصصون</b><p>مستشار جدولة، وكيل رعاية صوتي، منسّق عائلة، مراقب نطاق آمن، ومُعدّ تقرير الطبيب، كلٌّ بمهمة واضحة ولا يغيّر جرعة دون موافقة.</p></div></div>
+        </div>
+      </div>
+      <div class="principle rv" style="transition-delay:.1s">
+        <h3>المبدأ التصميمي: أقل نقرات، أكبر وضوح</h3>
+        <p>لغة عربية فصيحة دافئة خالية من المصطلحات المعقدة، وألوان وظيفية: أخضر للتأكيد والنجاح، مرجاني للفائت والحرج، ذهبي للتأجيل والقادم، وأزرق بحري للثقة والهدوء. كل شاشة تجيب عن سؤال واحد فقط: «ماذا عليّ أن أفعل الآن؟».</p>
+        <div class="swatches"><i style="background:#0E3A5A">ثقة</i><i style="background:#2D8A6B">تأكيد</i><i style="background:#D99B26">تأجيل</i><i style="background:#D9534F">حرج</i></div>
+        <a class="btn btn-w btn-sm" style="margin-top:18px" href="demo/index.html">شاهد الشاشات في النموذج</a>
+      </div>
     </div>
   </section>
 
-  <!-- الحل -->
-  <section class="py-8 reveal">
-    <h2 class="h2 reveal">الحل</h2>
-    <p class="lead reveal">تطبيق واحد يربط ثلاثة أطراف: المريض، وأهله، وبياناته الصحية من الساعة والمستشفى.</p>
-    <div class="card lift reveal relative mb-4 !border-2 !border-success bg-gradient-to-br from-success/15 via-transparent to-tint/10 gradient-live">
-      <span class="absolute -top-3 right-5 bg-success text-white text-xs font-bold px-3 py-0.5 rounded-lg">الميزة الأساسية</span>
-      <div class="grid md:grid-cols-[auto_1fr] gap-5 items-center">
-        <div class="text-5xl">🫶</div>
-        <div>
-          <h3 class="font-extrabold text-xl mb-1">وضع الرعاية لكل من يحتاج متابعة</h3>
-          <p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">كبار السن، الأطفال، مرضى الزهايمر، وكل مريض يحتاج أحداً يطمئن عليه. المريض يرى واجهة مبسّطة مكبّرة بزر واحد وصوت قريبه بدل الرنة، ومن يرعاه يرى الجرعات والموقع والحالة اليومية لحظياً، وتصله التنبيهات عند التأخر أو الخروج من النطاق الآمن. يُفعّل بنقرة ويعمل مع أي مريض.</p>
-        </div>
-      </div>
+  <!-- الرسالة -->
+  <section id="mission">
+    <div class="sec-h rv"><div class="k">ثانياً</div><h2>الرسالة والرؤية والقيم</h2></div>
+    <div class="quote rv"><h3>«أن لا تُنسى جرعة، ولا يُترك مريض وحده، ولا يقلق قريب بلا سبب»</h3><p><b>الرسالة:</b> تمكين المريض من الالتزام بعلاجه بثقة واستقلالية، ومنح عائلته الاطمئنان الدائم عبر رعاية رقمية إنسانية، تحفظ كرامة كبير السن وتخفّف عبء الرعاية عن أهله، وتقدّم للطبيب صورة دقيقة عن حالة مريضه بين الزيارتين.</p><p style="margin-top:8px"><b>الرؤية:</b> أن يكون «جرعة» الرفيق الصحي الأول للعائلة العربية: تطبيق يفهم لغتها، ويعرف نظامها الصحي، ويحوّل التكنولوجيا من مصدر تعقيد إلى سند يومي.</p></div>
+    <div class="grid g4 values rv">
+      <div class="card"><div class="icbox soft-g"><svg class="ic"><use href="#i-heart"/></svg></div><h3>الكرامة أولاً</h3><p>المريض ليس «حالة» تُراقَب، بل إنسان يُساعَد. التنبيهات لطيفة، والصوت صوت قريب، والمعلومات تُعرض له لا عليه.</p></div>
+      <div class="card"><div class="icbox soft-p"><svg class="ic"><use href="#i-lock"/></svg></div><h3>الخصوصية</h3><p>البيانات الصحية ملك المستفيد، تُحفظ في حسابه، وتُشارَك فقط مع من يأذن له وبالصلاحيات التي يحددها.</p></div>
+      <div class="card"><div class="icbox soft-y"><svg class="ic"><use href="#i-bell"/></svg></div><h3>الاطمئنان بأقل إزعاج</h3><p>العائلة تُبلَّغ بما يهم فقط: الأقرب جغرافياً أولاً، ونشرة مسائية واحدة، وإنذار أحمر عند الضرورة وحدها.</p></div>
+      <div class="card"><div class="icbox soft-c"><svg class="ic"><use href="#i-shield"/></svg></div><h3>السلامة الدوائية</h3><p>فحص التفاعلات، حساب التباعد الزمني، مراقبة المخزون، وتحذير من الجرعة المكررة قبل أن تقع.</p></div>
     </div>
-    <div class="stagger grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-      <div class="card lift"><div class="text-3xl mb-2">⏰</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">تذكير ذكي بالعربية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">جدولة الأدوية مع تنبيه منطوق، تأجيل بلمسة، خصم تلقائي من المخزون، وتذكير بإعادة التعبئة.</p></div>
-      <div class="card lift"><div class="text-3xl mb-2">✉️</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">قراءة رسائل موعدي ووصفتي</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">الرسالة الرسمية تتحول تلقائياً إلى موعد في التقويم أو دواء في الجدول، على الجهاز دون رفع للسحابة.</p></div>
-      <div class="card lift"><div class="text-3xl mb-2">👨‍👩‍👧</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">شركاء الرعاية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">دعوة الأقارب برمز QR، صلاحيات محددة، سجل لحظي للجرعات، وتنبيه فوري عند التأخر.</p></div>
-      <div class="card lift"><div class="text-3xl mb-2">📍</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">النطاق الآمن</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">طوق أخضر حول المنزل وطوق أحمر للطوارئ. الخروج برفقة قريب لا يُطلق إنذاراً، والخروج وحده ينبّه الأهل بالموقع والبطارية.</p></div>
-      <div class="card lift"><div class="text-3xl mb-2">⌚</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">الصحة والساعة الذكية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">النبض والأكسجين وتخطيط القلب والنوم من Apple Watch وHealth Connect، وتطبيق مستقل على الساعة.</p></div>
-      <div class="card lift"><div class="text-3xl mb-2">✨</div><h3 class="font-extrabold text-lg mb-2 leading-[1.8]">مساعد ذكي على الجهاز</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يكتشف أنماط التأخر ونقص المخزون ويقترح تعديلات، ويكيّف الواجهة تلقائياً لكبار السن.</p></div>
+  </section>
+
+  <!-- الخدمات -->
+  <section id="services">
+    <div class="sec-h rv"><div class="k">ثالثاً</div><h2>الخدمات</h2><p>تنتظم خدمات التطبيق في خمس دوائر متكاملة، تبدأ من المريض وتتسع لتشمل عائلته وطبيبه. كل بطاقة تفتح الشاشة المقابلة في النموذج.</p></div>
+    <div class="grid g2 rv">
+      <div class="card svc"><div class="icbox g"><svg class="ic"><use href="#i-pill"/></svg></div><h3>١ · الالتزام بالدواء</h3><span class="who">للمريض</span>
+        <ul>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>تذكير دقيق بالجرعات:</b> <span>الجرعة التالية في بطاقة واحدة مع زر «تم التناول» و«تأجيل 15 دقيقة»، وتنبيهات محلية تعمل بلا إنترنت.</span></div></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>مستشار الجدولة:</b> <span>مسار من خمس خطوات: اسم الدواء بالبحث أو الكاميرا أو الصوت، الشكل الصيدلاني، عدد المرات، أول جرعة، ثم الجدول والتقييم.</span></div></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>كتالوج الأدوية والتفاعلات:</b> <span>الاسم التجاري والمادة الفعالة والتركيز، وتحذير من تعارض دواءين أو تكرار المادة الفعالة.</span></div></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>المخزون وإعادة التعبئة:</b> <span>خصم حبّة مع كل تأكيد، تنبيه قبل نفاد العلبة، وسجل الالتزام يوماً بيوم.</span></div></li>
+        </ul><a class="try" href="demo/index.html#meds">جرّب شاشة الأدوية ←</a></div>
+      <div class="card svc b"><div class="icbox b"><svg class="ic"><use href="#i-steth"/></svg></div><h3>٢ · المواعيد والمستندات</h3><span class="who">للمريض</span>
+        <ul>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>قارئ رسائل «موعدي» و«وصفتي»:</b> <span>يلتقط رسائل وزارة الصحة النصية ويحوّلها إلى موعد أو وصفة في التطبيق بنقرة واحدة.</span></div></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>تقويم شهري وأسبوعي:</b> <span>نقاط لونية لكل يوم، كشف تضارب المواعيد، وتنبيه مسبق قبل ساعتين أو يوم.</span></div></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>المرفقات الطبية:</b> <span>تصوير الروشتات وتقارير المختبر والأشعة وربطها بالموعد أو الدواء.</span></div></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>بطاقة التعريف الطبية:</b> <span>الأمراض المزمنة والحساسية وجهات الاتصال للطوارئ في بطاقة جاهزة للعرض.</span></div></li>
+        </ul><a class="try" style="color:var(--appt)" href="demo/index.html#appt:a1">جرّب تفاصيل الموعد ←</a></div>
+      <div class="card svc y"><div class="icbox y"><svg class="ic"><use href="#i-users"/></svg></div><h3>٣ · الرعاية والعائلة</h3><span class="who">للعائلة</span>
+        <ul>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>شركاء الرعاية:</b> <span>دعوة بالرابط أو QR، صلاحيات «متابعة فقط» أو «تعديل الأدوية»، ومزامنة فورية بين الأجهزة.</span></div></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>منسّق العائلة:</b> <span>ينبّه الأقرب أولاً عند تأخر الجرعة، ويسأل «من يرافقه للموعد؟» ويرسل نشرة مسائية واحدة.</span></div></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>وكيل الرعاية الصوتي:</b> <span>يستمع لكلام المريض العفوي، يجيبه بصوت دافئ، ويبلغ العائلة بملخص مرتب دون أن يكتب المريض حرفاً.</span></div></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>سجل العائلة اليومي:</b> <span>الأعراض والمزاج والنوم والقياسات، يراها الجميع ويُبنى عليها تقرير الطبيب.</span></div></li>
+        </ul><a class="try" style="color:var(--gold)" href="demo/index.html#caregivers">جرّب شركاء الرعاية ←</a></div>
+      <div class="card svc c"><div class="icbox c"><svg class="ic"><use href="#i-pin"/></svg></div><h3>٤ · السلامة والطوارئ</h3><span class="who">لمرضى الزهايمر وكبار السن</span>
+        <ul>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>الوضع المبسّط:</b> <span>واجهة فاتحة مكبّرة، أزرار بارتفاع 65 نقطة، صورة الدواء بحجم كبير، وإخفاء كل ما يشتّت.</span></div></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>النطاق الآمن:</b> <span>طوق أخضر حول المنزل وطوق أحمر للطوارئ، تمييز الخروج برفقة قريب عن الخروج وحده، وشاشة «طريقي إلى البيت».</span></div></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>التتبع المباشر:</b> <span>موقع المريض لحظياً، المسافة الفاصلة، نسبة بطارية هاتفه، وجرس إنذار عن بُعد واتصال سريع.</span></div></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><div><b>تنبيهات تنبؤية:</b> <span>إنذار عند انخفاض البطارية، وتوجيه الأعراض حسب شدتها: خفيف يُسجَّل بصمت، شديد بإنذار أحمر.</span></div></li>
+        </ul><a class="try" style="color:var(--coral)" href="demo/index.html#location">جرّب موقعي والنطاق الآمن ←</a></div>
+      <div class="card svc p" style="grid-column:1/-1"><div class="icbox pr"><svg class="ic"><use href="#i-file"/></svg></div><h3>٥ · الصحة والتحليلات والطبيب</h3><span class="who">للمريض والطبيب</span>
+        <div class="grid g2" style="gap:0 24px">
+          <ul>
+            <li><svg class="ic"><use href="#i-check"/></svg><div><b>لوحة الصحة:</b> <span>بيانات الساعة الذكية عبر Apple Health وHealth Connect مع قياسات يدوية: ضغط، سكر، نبض، نوم.</span></div></li>
+            <li><svg class="ic"><use href="#i-check"/></svg><div><b>مساعد الرعاية الذكي:</b> <span>يرصد الدواء الذي يتأخر دائماً وفترة اليوم الأكثر تفويتاً، ويقترح إزاحة الجرعة أو تكبير الواجهة.</span></div></li>
+          </ul>
+          <ul>
+            <li><svg class="ic"><use href="#i-check"/></svg><div><b>تقرير الطبيب:</b> <span>صفحة واحدة: نسبة الالتزام لكل دواء، الأعراض بعد الجرعات، والقياسات، بتصدير PDF قبل الموعد بيوم.</span></div></li>
+            <li><svg class="ic"><use href="#i-check"/></svg><div><b>تذكير الماء والحملات التوعوية:</b> <span>توزيع تذكيرات الماء على ساعات اليقظة بنصيحة يومية، ومحتوى توعوي صحي موجّه.</span></div></li>
+          </ul>
+        </div><a class="try" style="color:var(--primary)" href="demo/index.html#report">جرّب تقرير الطبيب ←</a></div>
     </div>
   </section>
 
   <!-- كيف يعمل -->
-  <section class="py-8 reveal">
-    <h2 class="h2 reveal">كيف يعمل</h2>
-    <div class="stagger grid sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-      <div class="card lift relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">١</span><h3 class="font-extrabold mb-2 leading-[1.8]">يسجّل المريض أدويته</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يدوياً بمنتقي شكل الحبة، أو من رسالة وصفتي، أو من كتالوج الأدوية الذكي.</p></div>
-      <div class="card lift relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">٢</span><h3 class="font-extrabold mb-2 leading-[1.8]">يصل التذكير في وقته</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">على الهاتف والساعة، منطوقاً بالعربية، مع زر «تم» وزر «تأجيل».</p></div>
-      <div class="card lift relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">٣</span><h3 class="font-extrabold mb-2 leading-[1.8]">يرى الأهل ما يحدث</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">سجل رعاية لحظي، وتنبيه إن تأخرت الجرعة أو خرج المريض من النطاق الآمن.</p></div>
-      <div class="card lift relative pt-6"><span class="absolute -top-3.5 right-4 w-8 h-8 rounded-full bg-success text-white grid place-items-center font-extrabold">٤</span><h3 class="font-extrabold mb-2 leading-[1.8]">يتعلّم التطبيق</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يقترح تعديل الأوقات، يذكّر بالتعبئة، ويرفع تقريراً للطبيب في المراجعة.</p></div>
+  <section id="how">
+    <div class="sec-h rv"><div class="k">المسار اليومي</div><h2>كيف يعمل</h2></div>
+    <div class="grid g4 steps rv">
+      <div class="card"><span class="num">١</span><h3>يسجّل المريض أدويته</h3><p>بمسار الجدولة من خمس خطوات: الاسم بالكتابة أو الكاميرا أو الصوت، أو من رسالة «وصفتي».</p></div>
+      <div class="card"><span class="num">٢</span><h3>يصل التذكير في وقته</h3><p>على الهاتف والساعة، منطوقاً بالعربية، مع زر «تم التناول» وزر «تأجيل 15 دقيقة».</p></div>
+      <div class="card"><span class="num">٣</span><h3>يرى الأهل ما يحدث</h3><p>سجل رعاية لحظي، وتنبيه إن تأخرت الجرعة أو خرج المريض من النطاق الآمن.</p></div>
+      <div class="card"><span class="num">٤</span><h3>يتعلّم التطبيق</h3><p>يقترح تعديل الأوقات، يذكّر بالتعبئة، ويرفع تقريراً للطبيب في المراجعة.</p></div>
     </div>
   </section>
 
-  <!-- ما تم بناؤه -->
-  <section class="py-8 reveal">
-    <h2 class="h2 reveal">ما تم بناؤه فعلاً</h2>
-    <p class="lead reveal">هذا ليس عرضاً لفكرة. هذه الأدوات مفعّلة الآن على iOS وأندرويد وApple Watch بقاعدة بيانات واحدة.</p>
-    <div class="stagger flex flex-wrap gap-2.5">
-      <span class="chip lift hover:bg-success/10 hover:text-success">تسجيل الدخول بـ Apple وGoogle</span><span class="chip lift hover:bg-success/10 hover:text-success">وضع الرعاية والمتابعة</span><span class="chip lift hover:bg-success/10 hover:text-success">شركاء الرعاية بدعوة ورمز QR</span><span class="chip lift hover:bg-success/10 hover:text-success">النطاق الآمن وموقع المريض</span><span class="chip lift hover:bg-success/10 hover:text-success">تذكير الجرعات بتنبيه منطوق</span><span class="chip lift hover:bg-success/10 hover:text-success">صوت القريب وصورته بدل الرنة</span><span class="chip lift hover:bg-success/10 hover:text-success">تأجيل وتخطي وتأكيد من الإشعار</span><span class="chip lift hover:bg-success/10 hover:text-success">قراءة رسائل موعدي</span><span class="chip lift hover:bg-success/10 hover:text-success">استيراد الأدوية من وصفتي</span><span class="chip lift hover:bg-success/10 hover:text-success">التعرف الذكي على الدواء</span><span class="chip lift hover:bg-success/10 hover:text-success">كتالوج الأدوية والتفاعلات</span><span class="chip lift hover:bg-success/10 hover:text-success">مستشار الجدولة بخمس خطوات</span><span class="chip lift hover:bg-success/10 hover:text-success">المخزون وتذكير إعادة الصرف</span><span class="chip lift hover:bg-success/10 hover:text-success">التقويم الشهري ونسب الالتزام</span><span class="chip lift hover:bg-success/10 hover:text-success">المرفقات والتقارير الطبية</span><span class="chip lift hover:bg-success/10 hover:text-success">الملف الطبي</span><span class="chip lift hover:bg-success/10 hover:text-success">بطاقة التعريف الطبية</span><span class="chip lift hover:bg-success/10 hover:text-success">ملفات المستشفيات</span><span class="chip lift hover:bg-success/10 hover:text-success">التقييمات الصحية</span><span class="chip lift hover:bg-success/10 hover:text-success">لوحة الصحة من الساعة</span><span class="chip lift hover:bg-success/10 hover:text-success">تخطيط القلب والنبض والنوم</span><span class="chip lift hover:bg-success/10 hover:text-success">القياسات اليدوية</span><span class="chip lift hover:bg-success/10 hover:text-success">تذكير شرب الماء</span><span class="chip lift hover:bg-success/10 hover:text-success">المساعد الذكي والأنماط</span><span class="chip lift hover:bg-success/10 hover:text-success">تقرير الطبيب PDF</span><span class="chip lift hover:bg-success/10 hover:text-success">الحملات التوعوية</span><span class="chip lift hover:bg-success/10 hover:text-success">قفل البصمة وFace ID</span><span class="chip lift hover:bg-success/10 hover:text-success">النسخ الاحتياطي</span><span class="chip lift hover:bg-success/10 hover:text-success">تطبيق الساعة ومضاعفاتها</span><span class="chip lift hover:bg-success/10 hover:text-success">الوضع الداكن والفاتح</span>
+  <!-- الأثر -->
+  <section id="impact">
+    <div class="sec-h rv"><div class="k">رابعاً</div><h2>كيف يعود الأثر على المستفيد؟</h2><p>جودة الحياة ليست رقماً واحداً، بل مجموع لحظات صغيرة: صباح بلا قلق، موعد لم يفت، ليلة ينام فيها الابن مطمئناً. يُحدث التطبيق أثره في أربع دوائر متداخلة.</p></div>
+    <div class="rv" style="margin-bottom:20px">
+      <table class="table">
+        <thead><tr><th>قبل</th><th>بعد «جرعة»</th><th>الأثر على جودة الحياة</th></tr></thead>
+        <tbody>
+          <tr><td>نسيان الجرعة أو تكرارها</td><td>تذكير دقيق وتأكيد بنقرة ومنع التكرار</td><td>استقرار الحالة الصحية وتقليل المضاعفات ودخول المستشفى</td></tr>
+          <tr><td>الاعتماد على الآخرين في كل تفصيلة</td><td>واجهة مبسّطة يستطيع كبير السن استخدامها وحده</td><td>استقلالية وكرامة وشعور بالتحكم في حياته</td></tr>
+          <tr><td>قلق الضياع خارج المنزل</td><td>نطاق آمن و«طريقي إلى البيت» بصوت القريب</td><td>حرية حركة آمنة للمريض وطمأنينة للعائلة</td></tr>
+          <tr><td>موعد يفوت لأن الرسالة ضاعت</td><td>الرسالة تصبح موعداً في التقويم مع تنبيه مسبق</td><td>متابعة طبية منتظمة واكتشاف مبكر للمشكلات</td></tr>
+          <tr><td>الطبيب لا يعرف ما حدث بين الزيارتين</td><td>تقرير من صفحة واحدة بالالتزام والأعراض والقياسات</td><td>قرارات علاجية أدق في وقت أقصر</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid g2 impact rv">
+      <div class="card"><div class="icbox soft-g"><svg class="ic"><use href="#i-user"/></svg></div><div><h3>المريض</h3><p>يلتزم بعلاجه دون أن يشعر بالمراقبة. يرى جرعة واحدة في كل مرة، ويؤكدها بنقرة، ويسمع صوت ابنه بدل رنّة باردة.</p></div></div>
+      <div class="card"><div class="icbox soft-p"><svg class="ic"><use href="#i-home"/></svg></div><div><h3>العائلة</h3><p>تطمئن دون اتصالات متكررة. تعرف أن الجرعة أُخذت، وأن والدها داخل النطاق الآمن، وتُبلَّغ بما يهم فقط.</p></div></div>
+      <div class="card"><div class="icbox soft-b"><svg class="ic"><use href="#i-steth"/></svg></div><div><h3>الطبيب</h3><p>يستقبل تقريراً جاهزاً قبل الموعد بيوم: الالتزام لكل دواء، الأعراض بعد الجرعات، والقياسات من الساعة واليد.</p></div></div>
+      <div class="card"><div class="icbox soft-y"><svg class="ic"><use href="#i-globe"/></svg></div><div><h3>المنظومة الصحية</h3><p>التزام أعلى يعني مضاعفات أقل وزيارات طوارئ أقل، وبيانات مجهولة الهوية تساعد على فهم الأنماط وتحسين الخدمة.</p></div></div>
+    </div>
+    <div class="kpi rv">
+      <div>نسبة الالتزام<small>لكل دواء ولكل شهر</small></div>
+      <div>الجرعات الفائتة والمؤجلة<small>واتجاهها أسبوعاً بأسبوع</small></div>
+      <div>المواعيد المحضورة<small>مقابل الفائتة</small></div>
+      <div>الأعراض بعد الجرعات<small>وربطها بالدواء المسؤول</small></div>
     </div>
   </section>
 
-  <!-- الوكلاء -->
-  <section class="py-8 reveal">
-    <h2 class="h2 reveal">الوكلاء العاملون في التطبيق</h2>
-    <p class="lead reveal">تسعة وكلاء يعملون على الجهاز، لكل واحد دور محدد وقواعد لا يتجاوزها. لا يشخّص أيٌّ منهم ولا يغيّر جرعة دون موافقة.</p>
-    <div class="stagger grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-      <div class="card lift"><div class="text-3xl mb-2">🫶</div><h3 class="font-extrabold mb-2 leading-[1.8]">وكيل الرعاية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يستمع لكلام المريض العفوي، يفهم نبرته وشكواه، يجيبه بصوت دافئ، ويبلغ العائلة بملخص مع التسجيل. يربط العرض بدواء أُخذ خلال الساعات الست الماضية، ويبلّغ فوراً بالموقع عند عرض عاجل.</p></div>
-      <div class="card lift"><div class="text-3xl mb-2">👨‍👩‍👧</div><h3 class="font-extrabold mb-2 leading-[1.8]">منسق العائلة</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">ينبّه الأقرب جغرافياً أولاً عند تأخر الجرعة، يسأل «من يرافقه للموعد؟» ويغلق البطاقة عند أول رد، يرسل نشرة مسائية، يوثّق من أعطى الدواء، ويدير لوحة مقدم الرعاية وأزرار الاستغاثة.</p></div>
-      <div class="card lift"><div class="text-3xl mb-2">⏰</div><h3 class="font-extrabold mb-2 leading-[1.8]">مجدول التذكيرات</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">تدرج ثلاثي: تمهيد قبل ١٥ دقيقة، التنبيه بصوت القريب في الموعد، ثم تنبيه مقدم الرعاية بعد ٣٠ دقيقة بلا تأكيد. يذكّر بالموعد قبل يوم و١٢ ساعة وساعتين، ويكشف الوصول للمستشفى تلقائياً.</p></div>
-      <div class="card lift"><div class="text-3xl mb-2">📍</div><h3 class="font-extrabold mb-2 leading-[1.8]">مراقب النطاق الآمن</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يميّز الخروج برفقة قريب عن الخروج وحده، ويقدّر الحركة والبطارية. الحذر مراقبة صامتة، والطوارئ فقط تُنبّه بصوت مع شاشة «طريقي إلى البيت» بصوت القريب.</p></div>
-      <div class="card lift"><div class="text-3xl mb-2">🗓</div><h3 class="font-extrabold mb-2 leading-[1.8]">محرك الجدولة الذكية</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يقود إضافة الدواء بخمس خطوات، يربط كل جرعة بوجبة أو بالنوم مع سبب مفهوم، يباعد المضادات الحيوية، يكشف الدواء المكرر والتعارض الحرج ويجمّد الجدول حتى مراجعة الطبيب.</p></div>
-      <div class="card lift"><div class="text-3xl mb-2">🔎</div><h3 class="font-extrabold mb-2 leading-[1.8]">التعرف الذكي على الدواء</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يحوّل الاسم التجاري كما على العبوة إلى مادة فعالة وفئة. الكتالوج المحلي أولاً دون اتصال، ثم نموذج الجهاز، ثم قاعدة RxNorm. لا يتعلّم دواءً جديداً إلا بقبول المستخدم.</p></div>
-      <div class="card lift"><div class="text-3xl mb-2">✨</div><h3 class="font-extrabold mb-2 leading-[1.8]">مساعد الأنماط</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يحلل سلوك المريض مع الدواء على مدى أسابيع: الدواء الذي يُؤخذ متأخراً دائماً، وفترة اليوم الأكثر تفويتاً. يقترح إزاحة الجرعة أو توسيع النطاق، ولا يطبّق شيئاً دون موافقة.</p></div>
-      <div class="card lift"><div class="text-3xl mb-2">📄</div><h3 class="font-extrabold mb-2 leading-[1.8]">مُعدّ تقرير الطبيب</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يحوّل ما سجّلته العائلة والمريض خلال الشهور إلى تقرير من صفحة واحدة: الالتزام لكل دواء، الأعراض بعد الجرعات، القياسات وبيانات الساعة. عربي وإنجليزي وPDF قبل الموعد بيوم.</p></div>
-      <div class="card lift"><div class="text-3xl mb-2">💧</div><h3 class="font-extrabold mb-2 leading-[1.8]">مذكّر شرب الماء</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">يوزّع التذكيرات على ساعات اليقظة بنصيحة توعوية، لا يزيد على سبعة في اليوم ولا يرسل أثناء النوم. الالتزام الضعيف يُحال إلى مساعد الأنماط.</p></div>
+  <!-- المنصات -->
+  <section style="padding-top:10px">
+    <div class="sec-h rv"><div class="k">قنوات الوصول</div><h2>تجربة واحدة عبر الأجهزة</h2></div>
+    <div class="plat rv">
+      <span><svg class="ic" style="width:18px;height:18px"><use href="#i-phone"/></svg> iPhone: التجربة الكاملة مع Face ID والتنبيهات المحلية</span>
+      <span><svg class="ic" style="width:18px;height:18px"><use href="#i-phone"/></svg> أندرويد: نفس الشاشات والبيانات على الحساب ذاته</span>
+      <span><svg class="ic" style="width:18px;height:18px"><use href="#i-watch"/></svg> Apple Watch: الجرعة التالية على المعصم وتأكيدها بنقرة</span>
+      <span><svg class="ic" style="width:18px;height:18px"><use href="#i-globe"/></svg> الويب: معاينة سريعة للحساب والجدول</span>
     </div>
   </section>
 
-  <!-- خارطة الطريق -->
-  <section class="py-8 reveal">
-    <h2 class="h2 reveal">خارطة الطريق</h2>
-    <div class="stagger grid md:grid-cols-3 gap-4 mt-4">
-      <div class="card lift"><h3 class="font-extrabold text-success mb-1">✓ منجز</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">iOS وأندرويد والساعة، وضع الرعاية، شركاء الرعاية، النطاق الآمن، قراءة الرسائل، الصحة، المساعد الذكي، البطاقة الطبية، التقييمات.</p></div>
-      <div class="card lift"><h3 class="font-extrabold text-warning mb-1">◐ الربع القادم</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">إطلاق تجريبي مع ٢٠٠ عائلة، الاشتراك العائلي، تقرير الطبيب PDF، تحسين كتالوج الأدوية السعودي.</p></div>
-      <div class="card lift"><h3 class="font-extrabold text-success mb-1">○ لاحقاً</h3><p class="text-[14px] text-muted dark:text-mutedd leading-[1.9]">تكامل مباشر مع منصات وزارة الصحة، نسخة دور الرعاية، توصيل الأدوية عبر شركاء الصيدليات.</p></div>
-    </div>
-  </section>
-
-  <!-- الطلب -->
-  <div class="reveal my-8 mb-12 rounded-[28px] p-8 md:p-10 bg-gradient-to-br from-primary via-[#1B5A80] to-success text-white gradient-live grid md:grid-cols-[1fr_auto] gap-6 items-center">
-    <div><h2 class="h2 text-white">نبحث عن شريك للمرحلة التالية</h2><p class="opacity-85">التمويل سيُوجَّه إلى الإطلاق التجريبي، فريق الدعم، والتراخيص الصحية.</p></div>
-    <a class="btn bg-white text-primary hover:bg-ivory hover:-translate-y-0.5 hover:shadow-xl" href="demo/index.html">▶ شاهد النموذج</a>
+  <!-- الخاتمة -->
+  <div class="final rv">
+    <div><h2>جرّب التطبيق الآن في متصفحك</h2><p>الرئيسية، الأدوية، التقويم، ملفي، تفاصيل الموعد، نافذة الإضافة، ومسار جدولة الدواء من خمس خطوات. كل شيء قابل للنقر، وكل البيانات وهمية.</p></div>
+    <a class="btn btn-w" href="demo/index.html"><svg class="ic" style="width:18px;height:18px;fill:currentColor;stroke:none"><use href="#i-play"/></svg> افتح النموذج التفاعلي</a>
   </div>
 
-  <footer class="py-5 pb-10 text-sm text-muted dark:text-mutedd border-t border-sep dark:border-sepd">جرعة · Jor'ah — نموذج أولي للعرض. كل الأسماء والأرقام في النموذج وهمية.</footer>
-</div>
+  <footer><span>جرعة · Jor'ah — صفحة تعريفية ونموذج أولي للعرض. كل الأسماء والأرقام في النموذج وهمية.</span><span>الهوية: Cairo · #0E3A5A · #2D8A6B · #D9534F · #D99B26</span></footer>
+</main>
 
 <script>
-/* ---- الحركة ---- */
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
-
 /* الظهور عند التمرير */
-const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
-document.querySelectorAll('.reveal, .stagger').forEach(el => io.observe(el));
-
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .1 });
+document.querySelectorAll('.rv').forEach(el => io.observe(el));
+/* احتياط: إن لم يعمل المراقب (طباعة، متصفح قديم) تظهر كل الأقسام بعد ثانيتين */
+setTimeout(() => document.querySelectorAll('.rv').forEach(el => el.classList.add('in')), 2000);
 /* العدّادات */
 const cio = new IntersectionObserver(es => es.forEach(e => {
   if (!e.isIntersecting) return; cio.unobserve(e.target);
-  const el = e.target, target = +el.dataset.count, suffix = el.dataset.suffix || '';
-  if (reduce || target === 0) { el.textContent = ar(target) + suffix; return; }
-  const t0 = performance.now(), dur = 1400;
-  const tick = now => { const p = Math.min(1, (now - t0) / dur), v = Math.round(target * (1 - Math.pow(1 - p, 3))); el.textContent = ar(v) + suffix; if (p < 1) requestAnimationFrame(tick); };
+  const el = e.target, target = +el.dataset.count; if (reduce) { el.textContent = target; return; }
+  const t0 = performance.now(), dur = 1200;
+  const tick = now => { const p = Math.min(1, (now - t0) / dur); el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(tick); };
   requestAnimationFrame(tick);
 }), { threshold: .6 });
 document.querySelectorAll('[data-count]').forEach(el => cio.observe(el));
-
 /* شريط تقدم القراءة */
-const bar = document.getElementById('progress');
-addEventListener('scroll', () => { const h = document.documentElement; bar.style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + '%'; }, { passive: true });
-
-/* جزيئات خفيفة في الخلفية */
-if (!reduce) { const box = document.getElementById('particles'); for (let i = 0; i < 18; i++) { const d = document.createElement('i'); const sz = 4 + Math.random() * 8; d.className = 'particle'; d.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random() * 100}%;top:${100 + Math.random() * 100}%;animation-duration:${18 + Math.random() * 22}s;animation-delay:-${Math.random() * 30}s;opacity:${.25 + Math.random() * .4}`; box.appendChild(d); } }
-
-/* ميل الهاتف مع الفأرة */
-const tilt = document.getElementById('frame');
-if (!reduce && tilt && matchMedia('(hover:hover)').matches) {
-  tilt.addEventListener('mousemove', e => { const r = tilt.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; tilt.style.transform = `perspective(900px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg)`; });
-  tilt.addEventListener('mouseleave', () => { tilt.style.transform = ''; });
-}
-
+addEventListener('scroll', () => { const h = document.documentElement; document.getElementById('progress').style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + '%'; }, { passive: true });
 /* تصغير إطار الهاتف ليناسب عرض الحاوية */
-function fit(){const f=document.getElementById('frame'),i=document.getElementById('pf');const s=f.clientWidth/390;i.style.transform=`scale(${s})`;f.style.height=(844*s)+'px';}
-addEventListener('resize',fit);fit();
+function fit() { const inner = document.getElementById('inner'), f = document.getElementById('pf'); const s = inner.clientWidth / 390; f.style.transform = `scale(${s})`; inner.style.height = (844 * s) + 'px'; }
+addEventListener('resize', fit); fit();
 </script>
 </body>
 </html>

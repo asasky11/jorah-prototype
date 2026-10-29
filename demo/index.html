@@ -4,580 +4,677 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>جرعة — نموذج تفاعلي</title>
+<meta name="description" content="نموذج تفاعلي لتطبيق جرعة | Jor'ah للتذكير بالأدوية والمواعيد الطبية. بيانات وهمية للعرض فقط.">
 <link rel="icon" href="../assets/icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com/3.4.1"></script>
-<script>
-/* ألوان جرعة (DESIGN.md / theme.ts). الألوان الموضوعية ثابتة، وألوان السطح متغيرات CSS
-   حتى يبدّلها الوضع الداكن ووضع الرعاية دون تغيير الأصناف. */
-tailwind.config = {
-  theme: {
-    extend: {
-      fontFamily: { cairo: ['Cairo', 'system-ui', 'sans-serif'] },
-      colors: {
-        primary: '#0E3A5A', success: '#2D8A6B', alert: '#D9534F', warning: '#D99B26', appt: '#3B6E9E',
-        bg: 'var(--bg)', card: 'var(--card)', cardb: 'var(--card-border)', ink: 'var(--text)', muted: 'var(--text2)',
-        sep: 'var(--sep)', tint: 'var(--tint)', field: 'var(--field)', appbar: 'var(--appbar)', nav: 'var(--nav)', stage: 'var(--stage)',
-      },
-      borderRadius: { '2.5xl': '1.25rem' },
-    },
-  },
-};
-</script>
-<style type="text/tailwindcss">
-  :root{
-    --bg:#F7F9FA; --card:rgba(255,255,255,.86); --card-border:rgba(14,58,90,.08);
-    --text:#0E3A5A; --text2:#5B6B78; --sep:#E2E8F0; --tint:#0E3A5A; --field:rgba(14,58,90,.06);
-    --appbar:rgba(244,246,248,.8); --nav:rgba(255,255,255,.78); --stage:#E6ECF0;
-  }
-  [data-theme="dark"]{
-    --bg:#121B22; --card:rgba(26,34,40,.92); --card-border:rgba(255,255,255,.06);
-    --text:#FFFFFF; --text2:#94A3B8; --sep:#1E293B; --tint:#8CC4E8; --field:rgba(255,255,255,.07);
-    --appbar:rgba(13,21,27,.85); --nav:rgba(13,21,27,.85); --stage:#0B1117;
-  }
-  /* وضع الرعاية: سطح فاتح دافئ وتكبير العناصر */
-  [data-alz="1"] .screen{ --bg:#F9EFE6; --card:#FFFFFF; --text:#0E3A5A; --text2:#5B6B78; --field:rgba(14,58,90,.07); --appbar:rgba(249,239,230,.9); --nav:rgba(255,255,255,.9); --sep:#E2E8F0; }
-  [data-alz="1"] .hide-alz{ display:none !important; }
-  [data-alz="1"] .bigpill{ display:grid !important; }
-  [data-alz="1"] .due-name{ font-size:30px; }
-  [data-alz="1"] .due-act{ height:64px; font-size:19px; border-radius:18px; }
-  [data-alz="1"] .item{ padding:18px 14px; }
-  [data-alz="1"] .item .n{ font-size:20px; }
-  [data-alz="1"] .item .t{ font-size:16px; min-width:56px; }
-  [data-alz="1"] .btn-full{ height:66px; font-size:19px; }
-  [data-alz="1"] .fab{ display:none; }
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ---------- الهوية (DESIGN.md) ---------- */
+:root{
+  --primary:#0E3A5A; --green:#2D8A6B; --coral:#D9534F; --gold:#D99B26; --appt:#3B6E9E;
+  --bg:#F7F9FA; --card:rgba(255,255,255,.80); --card-solid:#FFFFFF; --card-border:rgba(14,58,90,.07);
+  --ink:#0E3A5A; --muted:#5B6B78; --sep:#E6EBF0; --field:#EEF2F5; --field-ink:#0E3A5A;
+  --nav:rgba(255,255,255,.82); --stage:#E8EDF1; --shadow:0 10px 30px -14px rgba(14,58,90,.25);
+  --r-card:20px; --r-btn:14px;
+}
+[data-theme="dark"]{
+  --bg:#121B22; --card:rgba(26,34,40,.86); --card-solid:#1A2228; --card-border:rgba(255,255,255,.06);
+  --ink:#F3F6F8; --muted:#94A3B8; --sep:#1E293B; --field:rgba(255,255,255,.07); --field-ink:#F3F6F8;
+  --nav:rgba(13,21,27,.86); --stage:#0B1117; --shadow:0 10px 30px -14px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box} html,body{margin:0}
+body{font-family:'Cairo',system-ui,sans-serif;background:var(--stage);color:var(--ink);font-size:16px;line-height:1.8;min-height:100vh;display:flex;align-items:center;justify-content:center;gap:28px;padding:20px;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,b,strong{line-height:1.7;margin:0}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input,select{font:inherit;color:var(--field-ink)}
+svg{display:block;flex:none}
+.ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 
-  /* الإطار المتحرك حول بطاقة الجرعة المستحقة (لا يُعبَّر عنه بأصناف Tailwind) */
-  @property --a { syntax:'<angle>'; inherits:false; initial-value:0deg; }
-  @keyframes spin { to { --a:360deg; } }
-  .due{ background:conic-gradient(from var(--a),#2D8A6B,#D99B26,#0E3A5A,#2D8A6B); animation:spin 4s linear infinite; }
-  .ring{ background:conic-gradient(#2D8A6B calc(var(--p)*1%), var(--field) 0); }
-  .ring::after{ content:''; position:absolute; inset:6px; border-radius:50%; background:var(--bg); }
-  .sw::after{ content:''; position:absolute; top:3px; right:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:.2s; }
-  .sw.on::after{ right:21px; }
-  .qr{ background:repeating-linear-gradient(90deg,var(--text) 0 8px,transparent 8px 16px),repeating-linear-gradient(0deg,var(--text) 0 8px,var(--bg) 8px 16px); background-blend-mode:difference; }
-  .view{ scrollbar-width:none; } .view::-webkit-scrollbar{ display:none; }
-  @keyframes up { from { transform:translateY(60px); opacity:0; } }
-  .sheet-in{ animation:up .3s cubic-bezier(.2,.8,.2,1); }
+/* ---------- خلفية المسرح ---------- */
+.stage-art{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.stage-art i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.35;animation:blob 20s ease-in-out infinite}
+@keyframes blob{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.08)}66%{transform:translate(-30px,25px) scale(.95)}}
 
-  /* ---- الحركة ---- */
-  @keyframes screen-in { from { opacity:0; transform:translateX(-18px); } to { opacity:1; transform:none; } }
-  @keyframes rise { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
-  @keyframes pulse-ring { 0%{ box-shadow:0 0 0 0 rgba(45,138,107,.5); } 70%{ box-shadow:0 0 0 12px rgba(45,138,107,0); } 100%{ box-shadow:0 0 0 0 rgba(45,138,107,0); } }
-  @keyframes blob { 0%,100%{ transform:translate(0,0) scale(1); } 33%{ transform:translate(40px,-30px) scale(1.1); } 66%{ transform:translate(-30px,25px) scale(.95); } }
-  @keyframes wiggle { 0%,100%{ transform:rotate(0); } 20%{ transform:rotate(-12deg); } 40%{ transform:rotate(10deg); } 60%{ transform:rotate(-6deg); } 80%{ transform:rotate(4deg); } }
-  @keyframes pop { 0%{ transform:scale(.6); opacity:0; } 60%{ transform:scale(1.15); } 100%{ transform:scale(1); opacity:1; } }
-  @keyframes shimmer { to { background-position:200% center; } }
-  @keyframes ring-fill { from { --p:0; } }
-  @property --p { syntax:'<number>'; inherits:false; initial-value:0; }
-  #screens > * { animation: screen-in .32s cubic-bezier(.2,.8,.2,1); }
-  .view > .card, .view > .med, .view > .due, .view > .appbar ~ .row, .view .hello-anim, .view > .btn, .view > .flex, .view > .grid { animation: rise .45s cubic-bezier(.2,.8,.2,1) both; }
-  .view > *:nth-child(2){ animation-delay:.04s } .view > *:nth-child(3){ animation-delay:.08s } .view > *:nth-child(4){ animation-delay:.12s } .view > *:nth-child(5){ animation-delay:.16s } .view > *:nth-child(6){ animation-delay:.20s } .view > *:nth-child(7){ animation-delay:.24s } .view > *:nth-child(8){ animation-delay:.28s } .view > *:nth-child(n+9){ animation-delay:.32s }
-  .pulse { animation: pulse-ring 2.2s ease-out infinite; }
-  .ring { animation: ring-fill 1.1s cubic-bezier(.2,.8,.2,1) both; }
-  .fab { transition: transform .2s; } .fab:hover { transform: scale(1.08) rotate(90deg); }
-  .nav-btn { transition: transform .15s, color .2s; } .nav-btn.on span { animation: pop .35s cubic-bezier(.2,.8,.2,1); }
-  .med, .item, .opt, .day, .cup { transition: transform .18s, box-shadow .18s, background .18s; }
-  .med:hover, .opt:hover { transform: translateY(-3px); box-shadow: 0 10px 24px -10px rgba(14,58,90,.35); }
-  .med:active, .item:active, .cup:active, .btn:active { transform: scale(.97); }
-  .bell:hover { animation: wiggle .6s; }
-  .check-pop { animation: pop .4s cubic-bezier(.2,.8,.2,1); }
-  .shine { background: linear-gradient(90deg,#fff 0%,#fff 40%,#8CC4E8 50%,#fff 60%,#fff 100%); background-size:200% auto; -webkit-background-clip:text; background-clip:text; color:transparent; animation: shimmer 4s linear infinite; }
-  .bar i { transition: width .9s cubic-bezier(.2,.8,.2,1); }
-  .stage-blob { position:absolute; border-radius:9999px; filter:blur(64px); pointer-events:none; animation: blob 18s ease-in-out infinite; }
-  .toast { transition: transform .35s cubic-bezier(.2,.8,.2,1), opacity .35s; }
-  @media (prefers-reduced-motion: reduce) {
-    #screens > *, .view > *, .pulse, .ring, .nav-btn.on span, .bell:hover, .check-pop, .shine, .stage-blob { animation: none !important; }
-    .med:hover, .opt:hover, .fab:hover { transform: none !important; }
-  }
+/* ---------- لوحة العرض ---------- */
+.panel{width:252px;font-size:14px;display:flex;flex-direction:column;gap:14px}
+.panel h1{font-size:20px;font-weight:800;display:flex;align-items:center;gap:10px}
+.panel h1 img{width:36px;height:36px;border-radius:9px}
+.panel .tag{font-size:12px;color:var(--gold);border:1px solid var(--gold);border-radius:6px;padding:0 6px;font-weight:600;margin-right:6px}
+.panel p{color:var(--muted);margin:0;font-size:13.5px}
+.pbox{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:12px;backdrop-filter:blur(10px)}
+.pbox b{display:block;margin-bottom:8px;font-size:14px}
+.pbtn{width:100%;text-align:right;padding:7px 10px;border-radius:9px;border:1px solid var(--card-border);margin-bottom:6px;transition:.15s}
+.pbtn:hover{background:var(--field)} .pbtn.active{background:var(--primary);color:#fff;border-color:transparent}
+.prow{display:flex;justify-content:space-between;align-items:center;padding:7px 2px}
+.back{display:none;align-items:center;justify-content:center;gap:8px;height:44px;border-radius:12px;background:var(--primary);color:#fff;font-weight:700;text-decoration:none}
+.back.show{display:flex}
 
-  @layer base {
-    h1, h2, h3, b { line-height: 1.8; }
-    p { @apply leading-[1.85]; }
-  }
-  @layer components {
-    .card { @apply bg-card border border-cardb rounded-2.5xl p-4 mb-3.5 backdrop-blur-md; }
-    .card h3 { @apply text-[17px] font-bold mb-2.5 leading-[1.8]; }
-    .sub { @apply text-muted text-[14px] leading-[1.8]; }
-    .row { @apply flex items-center gap-3; }
-    .sb { @apply justify-between; }
-    .btn { @apply font-bold text-[16px] border-0 rounded-[14px] h-12 px-[18px] cursor-pointer inline-flex items-center justify-center gap-2 transition-transform active:scale-[.97]; }
-    .btn-g { @apply btn bg-success text-white; }
-    .btn-n { @apply btn bg-field text-ink; }
-    .btn-p { @apply btn bg-primary text-white; }
-    .btn-full { @apply w-full h-[54px] rounded-2xl text-[17px]; }
-    .chip { @apply inline-block text-[12.5px] px-2.5 py-0.5 rounded-[7px] font-bold; }
-    .pill { @apply w-[34px] h-[34px] rounded-[10px] grid place-items-center text-base flex-none border border-black/10; }
-    .hr { @apply h-px bg-sep my-3; }
-    .field { @apply h-[52px] rounded-[14px] bg-field flex items-center gap-2.5 px-3.5 text-muted text-[15px] mb-3; }
-    .ib { @apply w-11 h-11 grid place-items-center rounded-xl text-muted cursor-pointer border-0 bg-transparent text-[22px] hover:bg-field; }
-    .appbar { @apply sticky top-0 z-[5] -mx-4 mb-2.5 px-4 pt-1.5 pb-2.5 bg-appbar backdrop-blur-xl border-b border-sep flex items-center justify-between min-h-[44px]; }
-    .appbar h2 { @apply text-[22px] font-extrabold; }
-    .item { @apply flex items-center gap-3 p-3 rounded-[14px] bg-field; }
-    .item .t { @apply text-[14.5px] text-muted min-w-[46px] text-center; }
-    .item .n { @apply font-bold text-[16px] leading-[1.7]; }
-    .item.done { @apply opacity-60; } .item.done .n { @apply line-through; }
-    .item.appt { @apply bg-appt/15 border-r-[3px] border-appt; }
-    .item.missed { @apply border-r-[3px] border-alert; }
-    .med { @apply flex items-center gap-3 p-4 rounded-2xl bg-card border border-cardb mb-2.5 cursor-pointer text-[16px]; }
-    .bar { @apply h-1.5 rounded-[3px] bg-field overflow-hidden mt-1.5; }
-    .bar i { @apply block h-full rounded-[3px] bg-success; } .bar i.low { @apply bg-alert; }
-    .stat { @apply flex-1 text-center py-3 px-1.5 rounded-[14px] bg-field; }
-    .stat b { @apply block text-[22px] font-extrabold; } .stat small { @apply text-muted text-[12.5px]; }
-    .set { @apply flex justify-between items-center py-3.5 border-b border-sep last:border-0 leading-[1.8] text-[16px]; }
-    .set small { @apply block text-muted text-[14.5px]; }
-    .sw { @apply w-11 h-[26px] rounded-[13px] bg-[#94A3B8] relative cursor-pointer transition flex-none; } .sw.on { @apply bg-success; }
-    .avatar { @apply w-11 h-11 rounded-full bg-primary text-white grid place-items-center font-extrabold text-lg relative flex-none; }
-    .avatar.on::after { content:''; @apply absolute bottom-px left-px w-[11px] h-[11px] rounded-full bg-success border-2 border-bg; }
-    .feed { @apply flex gap-2.5 py-3 border-b border-sep last:border-0; }
-    .feed i { @apply w-2.5 h-2.5 rounded-full mt-[9px] flex-none; }
-    .feed .ok { @apply bg-success; } .feed .warn { @apply bg-warning; } .feed .info { @apply bg-appt; }
-    .day { @apply flex-1 h-[66px] rounded-[14px] flex flex-col items-center justify-center gap-0.5 text-[14.5px] text-muted bg-card border border-cardb; }
-    .day b { @apply text-[17px] text-ink; }
-    .day.today { @apply bg-primary text-white/75; } .day.today b { @apply text-white; }
-    .dots { @apply flex gap-[3px] h-[5px]; } .dots i { @apply w-[5px] h-[5px] rounded-full; }
-    .cup { @apply flex-1 h-[34px] rounded-[9px] bg-field grid place-items-center cursor-pointer text-[15px] transition; } .cup.f { @apply bg-appt/25; }
-    .nav-btn { @apply border-0 bg-transparent text-muted flex flex-col items-center gap-0.5 text-[12.5px] font-bold cursor-pointer w-[64px]; }
-    .nav-btn span { @apply text-[23px]; } .nav-btn.on { @apply text-tint; }
-    .fab { @apply w-14 h-14 rounded-full bg-success text-white text-3xl grid place-items-center -mt-[30px] shadow-[0_8px_20px_rgba(45,138,107,.45)] border-4 border-bg cursor-pointer; }
-    .seg-opt { @apply flex-1 rounded-[18px] grid place-items-center text-[15px] font-bold text-muted cursor-pointer; }
-    .seg-opt.on { @apply bg-success text-white shadow-[0_4px_14px_rgba(45,138,107,.4)]; }
-    .opt { @apply flex-1 py-[18px] px-2.5 rounded-[18px] bg-card border border-cardb text-center cursor-pointer font-bold text-[16px]; }
-    .opt span { @apply block text-[34px] mb-1.5; }
-    .shape { @apply w-10 h-10 rounded-xl border-2 border-transparent cursor-pointer; } .shape.on { @apply border-success; }
-    .grid-c { @apply h-11 rounded-[10px] flex flex-col items-center justify-center text-[14px] gap-0.5; } .grid-c.today { @apply bg-primary text-white font-extrabold; }
-    .panel-btn { @apply w-full text-right px-2.5 py-2 rounded-[9px] border border-cardb bg-transparent text-ink cursor-pointer mb-1.5 hover:bg-field; }
-    .panel-btn.active { @apply bg-primary text-white border-transparent; }
-    .ins p { @apply text-muted text-[14.5px] leading-[1.85] my-1.5 mb-3; }
-  }
+/* ---------- المفتاح ---------- */
+.sw{width:46px;height:28px;border-radius:14px;background:#C5CED6;position:relative;flex:none;transition:.2s;cursor:pointer}
+.sw::after{content:'';position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.sw.on{background:var(--green)} .sw.on::after{right:21px}
 
-  /* على الجوال الحقيقي يملأ الشاشة بلا إطار */
-  @media (max-width:760px){
-    body{ padding:0 !important; display:block !important; background:var(--bg) !important; }
-    .panel{ display:none !important; }
-    .phone{ width:100% !important; height:100dvh !important; border-radius:0 !important; padding:0 !important; box-shadow:none !important; }
-    .screen{ border-radius:0 !important; }
-    .notch{ display:none !important; }
-    .status{ height:env(safe-area-inset-top,0px) !important; padding:0 !important; overflow:hidden; }
-    .nav{ bottom:calc(10px + env(safe-area-inset-bottom,0px)) !important; }
-    .mob-tools{ display:flex !important; }
-  }
+/* ---------- الهاتف ---------- */
+.phone{width:390px;height:844px;background:#0A0F14;border-radius:54px;padding:12px;box-shadow:0 30px 80px rgba(0,0,0,.35),inset 0 0 0 2px #2a333b;position:relative;flex:none}
+.notch{position:absolute;top:22px;left:50%;transform:translateX(-50%);width:120px;height:34px;background:#000;border-radius:20px;z-index:50}
+.screen{width:100%;height:100%;border-radius:42px;overflow:hidden;background:var(--bg);position:relative;display:flex;flex-direction:column;transition:background .3s}
+.screen-art{position:absolute;top:-60px;right:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle at 60% 40%,rgba(217,83,79,.22),rgba(139,196,232,.18) 45%,transparent 70%);filter:blur(10px);pointer-events:none}
+.status{height:54px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 6px;font-size:14px;font-weight:700;position:relative;z-index:2}
+#screens{flex:1;min-height:0;display:flex;flex-direction:column;position:relative;z-index:1}
+#screens>*{animation:screen-in .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes screen-in{from{opacity:0;transform:translateX(-14px)}}
+.view{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 16px 118px;scrollbar-width:none}
+.view::-webkit-scrollbar{display:none}
+.view>*{animation:rise .4s cubic-bezier(.2,.8,.2,1) both}
+.view>*:nth-child(2){animation-delay:.04s}.view>*:nth-child(3){animation-delay:.08s}.view>*:nth-child(4){animation-delay:.12s}.view>*:nth-child(5){animation-delay:.16s}.view>*:nth-child(n+6){animation-delay:.2s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+
+/* ---------- شريط التطبيق ---------- */
+.appbar{position:sticky;top:0;z-index:5;margin:0 -16px 10px;padding:4px 16px 10px;display:flex;align-items:center;justify-content:space-between;min-height:56px}
+.appbar h2{font-size:19px;font-weight:700;flex:1;text-align:center}
+.ib{width:46px;height:46px;border-radius:50%;background:var(--card-solid);border:1px solid var(--card-border);display:grid;place-items:center;box-shadow:0 4px 14px -8px rgba(14,58,90,.3);color:var(--primary)}
+.ib.alert{color:var(--coral)} .ib.ghost{background:transparent;border-color:transparent;box-shadow:none}
+.spacer{width:46px}
+
+/* ---------- البطاقات والأزرار ---------- */
+.card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--r-card);padding:16px;margin-bottom:14px;backdrop-filter:blur(14px);box-shadow:var(--shadow)}
+.card h3{font-size:17px;font-weight:700;margin-bottom:6px}
+.sub{color:var(--muted);font-size:14px;line-height:1.75}
+.row{display:flex;align-items:center;gap:12px} .sb{justify-content:space-between}
+.col{display:flex;flex-direction:column}
+.hr{height:1px;background:var(--sep);margin:12px 0}
+.btn{height:50px;border-radius:var(--r-btn);padding:0 18px;font-weight:700;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s,opacity .15s}
+.btn:active{transform:scale(.97)} .btn:disabled{opacity:.45}
+.btn-g{background:var(--green);color:#fff} .btn-p{background:var(--primary);color:#fff} .btn-a{background:var(--appt);color:#fff}
+.btn-n{background:var(--field);color:var(--ink)} .btn-o{background:transparent;border:1.5px solid var(--sep);color:var(--primary)}
+.btn-sm{height:40px;font-size:14.5px;padding:0 14px;border-radius:12px}
+.btn-full{width:100%} .btn-pill{border-radius:999px}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;padding:1px 10px;border-radius:999px}
+.chip-g{background:rgba(45,138,107,.14);color:var(--green)} .chip-c{background:rgba(217,83,79,.14);color:var(--coral)}
+.chip-y{background:rgba(217,155,38,.16);color:var(--gold)} .chip-b{background:rgba(59,110,158,.14);color:var(--appt)} .chip-n{background:var(--field);color:var(--muted)}
+.icbox{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex:none;color:#fff}
+.icbox.sm{width:34px;height:34px} .icbox.sm .ic{width:18px;height:18px}
+.icbox.g{background:var(--green)} .icbox.p{background:var(--primary)} .icbox.c{background:var(--coral)} .icbox.y{background:var(--gold)} .icbox.b{background:var(--appt)} .icbox.pk{background:#C9336B}
+.soft-g{background:rgba(45,138,107,.14);color:var(--green)} .soft-p{background:rgba(14,58,90,.1);color:var(--primary)} .soft-c{background:rgba(217,83,79,.14);color:var(--coral)} .soft-y{background:rgba(217,155,38,.16);color:var(--gold)} .soft-b{background:rgba(59,110,158,.14);color:var(--appt)}
+.field{height:52px;border-radius:14px;background:var(--field);display:flex;align-items:center;gap:10px;padding:0 14px;color:var(--muted);font-size:15px;margin-bottom:12px}
+.field input{flex:1;background:transparent;border:0;outline:0;min-width:0}
+.field input::placeholder{color:var(--muted);opacity:.8}
+.seg{display:flex;background:var(--field);border-radius:999px;padding:4px;gap:4px}
+.seg button{flex:1;height:40px;border-radius:999px;font-weight:700;font-size:14.5px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:6px}
+.seg button.on{background:var(--primary);color:#fff;box-shadow:0 4px 12px -6px rgba(14,58,90,.5)}
+.list .li{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--sep);cursor:pointer}
+.list .li:last-child{border-bottom:0}
+.list .li b{font-size:16px;display:block} .list .li .sub{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list .li .chev{color:var(--muted);margin-right:auto}
+.set{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--sep)}
+.set:last-child{border-bottom:0} .set .t{flex:1} .set .t small{display:block;color:var(--muted);font-size:13px;line-height:1.5}
+.set .ic{color:var(--muted);width:20px;height:20px}
+.bar{height:8px;border-radius:4px;background:var(--field);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;border-radius:4px;background:var(--green);transition:width .9s cubic-bezier(.2,.8,.2,1)} .bar i.low{background:var(--coral)}
+.stat{flex:1;text-align:center;padding:12px 6px;border-radius:14px;background:var(--field)}
+.stat b{display:block;font-size:22px;font-weight:800;line-height:1.3} .stat small{color:var(--muted);font-size:12.5px}
+.pillicon{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;border:1px solid rgba(0,0,0,.06);color:var(--primary)}
+.pillicon .ic{width:20px;height:20px}
+.avatar{width:52px;height:52px;border-radius:50%;background:var(--field);display:grid;place-items:center;color:var(--primary);font-weight:800;font-size:20px;flex:none;position:relative}
+.avatar.on::after{content:'';position:absolute;bottom:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--green);border:2px solid var(--bg)}
+.feed{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--sep)} .feed:last-child{border-bottom:0}
+.feed i{width:10px;height:10px;border-radius:50%;margin-top:10px;flex:none}
+.ok{background:var(--green)} .warn{background:var(--gold)} .info{background:var(--appt)}
+.ring{width:72px;height:72px;border-radius:50%;background:conic-gradient(var(--green) calc(var(--p)*1%),var(--field) 0);display:grid;place-items:center;position:relative;flex:none}
+.ring::after{content:'';position:absolute;inset:7px;border-radius:50%;background:var(--card-solid)}
+.ring span{position:relative;z-index:1;text-align:center;line-height:1.2;font-size:11.5px;color:var(--muted)}
+.ring span b{display:block;font-size:17px;color:var(--green);font-weight:800}
+.toast{position:absolute;top:66px;left:16px;right:16px;background:var(--primary);color:#fff;border-radius:16px;padding:12px 16px;font-size:15px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:60;transform:translateY(-130px);opacity:0;transition:.35s cubic-bezier(.2,.8,.2,1);display:flex;gap:10px;align-items:center}
+.toast.show{transform:none;opacity:1}
+
+/* الأسبوع */
+.week{display:flex;gap:6px;margin:10px 0 14px}
+.day{flex:1;height:76px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-size:12.5px;position:relative}
+.day b{font-size:19px;color:var(--ink);font-weight:700} .day.today{background:var(--primary);color:rgba(255,255,255,.75)} .day.today b{color:#fff}
+.day .dots{display:flex;gap:3px;height:5px} .dots i{width:5px;height:5px;border-radius:50%;display:block}
+
+/* بطاقة الجرعة المستحقة: الإطار المتدرج الدوّار هو الاستثناء الوحيد لقاعدة منع التدرج */
+@property --a{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes spin{to{--a:360deg}}
+.due{padding:2px;border-radius:22px;background:conic-gradient(from var(--a),var(--green),var(--gold),var(--primary),var(--green));animation:spin 5s linear infinite;margin-bottom:14px}
+.due>div{background:var(--card-solid);border-radius:20px;padding:16px}
+.due .name{font-size:22px;font-weight:800}
+.due-act{flex:1;height:48px}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(45,138,107,.5)}70%{box-shadow:0 0 0 12px rgba(45,138,107,0)}100%{box-shadow:0 0 0 0 rgba(45,138,107,0)}}
+.pulse{animation:pulse 2.2s ease-out infinite}
+.item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:var(--field);margin-bottom:10px}
+.item .n{font-weight:700;font-size:15.5px} .item .t{color:var(--muted);font-size:14px;min-width:60px;text-align:center}
+.item.done{opacity:.6} .item.done .n{text-decoration:line-through}
+.item.appt{background:rgba(59,110,158,.12);border-right:3px solid var(--appt)}
+.water-wave{height:10px;border-radius:5px;background:var(--field);overflow:hidden;margin-top:10px}
+.water-wave i{display:block;height:100%;background:var(--appt);border-radius:5px;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.banner{border-radius:var(--r-card);padding:16px;color:#fff;margin-bottom:14px;position:relative;background:linear-gradient(135deg,#E8738B,#D9534F)}
+.banner .x{position:absolute;left:14px;top:14px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center}
+.banner .btn{height:42px;font-size:14.5px}
+
+/* التقويم */
+.grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.grid7 .h{font-size:13px;color:var(--muted);padding:4px 0}
+.gc{height:50px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:15px;font-weight:600}
+.gc.other{color:#B6C0C9;font-weight:400} .gc.today{background:var(--primary);color:#fff;font-weight:800}
+
+/* التنقل السفلي */
+.nav{position:absolute;bottom:18px;left:16px;right:16px;height:66px;border-radius:24px;background:var(--nav);backdrop-filter:blur(18px);border:1px solid var(--card-border);display:flex;align-items:center;justify-content:space-around;box-shadow:0 12px 34px -10px rgba(14,58,90,.3);z-index:20}
+.nb{width:64px;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:12px;font-weight:700;color:var(--muted);position:relative}
+.nb.on{color:var(--green)} .nb.on::after{content:'';width:4px;height:4px;border-radius:50%;background:var(--green);margin-top:2px}
+.fab{width:62px;height:62px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;margin-top:-34px;box-shadow:0 10px 22px rgba(14,58,90,.4);border:5px solid var(--bg);transition:transform .2s}
+.fab:hover{transform:scale(1.06)} .fab .ic{width:28px;height:28px;stroke-width:2.4}
+
+/* النوافذ: كلها في وسط الشاشة فوق خلفية معتمة (قاعدة المالك 12.1) */
+.modal{position:absolute;inset:0;background:rgba(14,58,90,.35);backdrop-filter:blur(3px);z-index:40;display:none;align-items:center;justify-content:center;padding:18px}
+.modal.show{display:flex}
+.mbox{width:100%;max-height:92%;overflow:auto;background:var(--card-solid);border-radius:26px;padding:20px 18px;box-shadow:0 30px 60px -20px rgba(0,0,0,.4);animation:pop .3s cubic-bezier(.2,.8,.2,1);scrollbar-width:none}
+.mbox::-webkit-scrollbar{display:none}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+.mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.mhead h3{font-size:19px;font-weight:800;flex:1;text-align:center}
+.opt{flex:1;padding:22px 10px;border-radius:18px;border:1.5px solid var(--sep);text-align:center;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:10px;transition:.15s}
+.opt:hover{transform:translateY(-3px);box-shadow:var(--shadow)} .opt.on{border-color:var(--green);background:rgba(45,138,107,.08)}
+.steps{display:flex;gap:6px;margin:8px 0 6px} .steps i{flex:1;height:5px;border-radius:3px;background:var(--sep)} .steps i.on{background:var(--green)}
+.qbox{background:var(--field);border-radius:18px;padding:16px;margin:10px 0 14px}
+.qbox h4{font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.qbox .field{background:var(--card-solid)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px} .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.tile{padding:12px 8px;border-radius:14px;border:1.5px solid var(--sep);text-align:center;font-weight:700;font-size:14.5px;display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--card-solid)}
+.tile.on{border-color:var(--green);background:rgba(45,138,107,.1);color:var(--green)}
+.time-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:12px;background:var(--card-solid);border:1px solid var(--sep);margin-bottom:8px}
+.qr{width:150px;height:150px;margin:10px auto;border-radius:14px;background:repeating-linear-gradient(90deg,var(--ink) 0 8px,transparent 8px 16px),repeating-linear-gradient(0deg,var(--ink) 0 8px,var(--card-solid) 8px 16px);background-blend-mode:difference;opacity:.85;border:8px solid var(--card-solid);outline:1px solid var(--sep)}
+.map{height:220px;border-radius:var(--r-card);position:relative;overflow:hidden;background:#DCE7E2;margin-bottom:14px}
+.map::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 38px,rgba(0,0,0,.05) 38px 40px),repeating-linear-gradient(90deg,transparent 0 38px,rgba(0,0,0,.05) 38px 40px)}
+.map .zone{position:absolute;left:50%;top:50%;width:170px;height:170px;border-radius:50%;background:rgba(45,138,107,.18);border:2px dashed var(--green);transform:translate(-50%,-50%)}
+.map .home{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:var(--primary)}
+.map .me{position:absolute;left:58%;top:42%;width:16px;height:16px;border-radius:50%;background:var(--appt);border:3px solid #fff;box-shadow:0 0 0 6px rgba(59,110,158,.3)}
+.map .lbl{position:absolute;bottom:10px;right:10px;background:var(--card-solid);border-radius:10px;padding:4px 10px;font-size:12.5px;color:var(--ink)}
+.bars{display:flex;align-items:flex-end;gap:6px;height:70px;margin-top:8px} .bars i{flex:1;border-radius:6px 6px 2px 2px;background:var(--green);opacity:.85} .bars i.lo{background:var(--gold)}
+.tip{background:var(--field);border-radius:16px;padding:12px;margin-bottom:10px;display:flex;gap:10px}
+.tip b{font-size:15px} .tip .sub{font-size:13.5px}
+.actions{display:flex;justify-content:space-around;background:var(--card);border:1px solid var(--card-border);border-radius:var(--r-card);padding:12px 6px;margin-bottom:14px}
+.actions button{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px;font-weight:700;color:var(--muted);width:70px}
+.ecg{height:56px;border-radius:10px;position:relative;overflow:hidden;background:repeating-linear-gradient(90deg,transparent 0 24px,rgba(45,138,107,.15) 24px 25px);margin-top:8px}
+.ecg svg{position:absolute;inset:0;width:100%;height:100%}
+.hello{font-size:24px;font-weight:800}
+
+/* ---------- الوضع المبسّط (كبار السن / الزهايمر) ---------- */
+[data-simple="1"] .screen{--bg:#F9F1EA;--field:#F1E6DC;--card:rgba(255,255,255,.9)}
+[data-simple="1"] .hide-simple{display:none !important}
+[data-simple="1"] .bigpill{display:grid !important}
+[data-simple="1"] .due .name{font-size:30px}
+[data-simple="1"] .due-act{height:64px;font-size:19px;border-radius:18px}
+[data-simple="1"] .item{padding:18px 14px} [data-simple="1"] .item .n{font-size:19px} [data-simple="1"] .item .t{font-size:16px}
+[data-simple="1"] .btn-full{height:64px;font-size:19px}
+[data-simple="1"] .fab{display:none}
+[data-simple="1"] .hello{font-size:28px}
+
+/* الحركة المخفّضة */
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+
+/* على الجوال الحقيقي يملأ الشاشة بلا إطار */
+.mob-tools{display:none;position:fixed;top:8px;left:8px;z-index:100;gap:6px}
+.mob-tools a,.mob-tools button{font-size:12px;padding:5px 10px;border-radius:10px;border:1px solid var(--card-border);background:var(--card-solid);color:var(--ink);text-decoration:none;font-weight:700}
+@media (max-width:760px){
+  body{padding:0;display:block;background:var(--bg)}
+  .panel,.stage-art{display:none}
+  .phone{width:100%;height:100dvh;border-radius:0;padding:0;box-shadow:none}
+  .screen{border-radius:0} .notch{display:none}
+  .status{height:calc(48px + env(safe-area-inset-top,0px));padding:0;overflow:hidden;visibility:hidden}
+  .nav{bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  .mob-tools{display:flex}
+}
 </style>
 </head>
-<body data-theme="dark" class="font-cairo bg-stage text-ink text-[16px] leading-[1.8] min-h-screen flex items-center justify-center gap-7 p-5 transition-colors">
+<body>
 
-<!-- خلفية حية خلف المسرح -->
-<div class="fixed inset-0 -z-10 overflow-hidden hidden md:block" aria-hidden="true">
-  <div class="stage-blob w-[520px] h-[520px] bg-success/25 -top-40 -right-32"></div>
-  <div class="stage-blob w-[460px] h-[460px] bg-appt/25 top-[45%] -left-40" style="animation-delay:-6s"></div>
-  <div class="stage-blob w-[380px] h-[380px] bg-warning/15 bottom-[-120px] right-[35%]" style="animation-delay:-12s"></div>
+<div class="stage-art" aria-hidden="true">
+  <i style="width:520px;height:520px;background:#2D8A6B;top:-160px;right:-120px"></i>
+  <i style="width:460px;height:460px;background:#8CC4E8;top:45%;left:-160px;animation-delay:-6s"></i>
+  <i style="width:380px;height:380px;background:#D99B26;bottom:-120px;right:35%;animation-delay:-12s"></i>
 </div>
 
-<!-- لوحة العرض الجانبية -->
-<aside class="panel w-[250px] text-sm flex flex-col gap-3.5">
-  <h1 class="text-xl font-extrabold flex items-center gap-2.5"><img src="../assets/icon.png" alt="" class="w-9 h-9 rounded-[9px]">جرعة <span class="text-[13px] text-warning border border-warning rounded-md px-1.5 mr-1.5 font-semibold">نموذج أولي</span></h1>
-  <a id="backLink" href="../index.html" class="hidden items-center justify-center gap-2 h-11 rounded-xl bg-primary text-white font-bold no-underline hover:opacity-90">← العودة إلى صفحة العرض</a>
-  <p class="text-muted leading-relaxed">نموذج تفاعلي للعرض فقط. لا يتصل بالإنترنت ولا يحفظ بيانات. كل الأسماء وهمية.</p>
-  <div class="bg-card border border-cardb rounded-[14px] p-3">
-    <b class="block mb-2 text-[14.5px]">الشاشات</b>
-    <button class="panel-btn !bg-success/15 !border-success/40 font-bold" data-go="about">★ التطبيق والخدمات</button>
-    <button class="panel-btn" data-go="onboarding">الترحيب</button>
-    <button class="panel-btn" data-go="login">تسجيل الدخول</button>
-    <button class="panel-btn" data-go="home">الرئيسية</button>
-    <button class="panel-btn" data-go="meds">الأدوية</button>
-    <button class="panel-btn" data-go="calendar">التقويم</button>
-    <button class="panel-btn" data-go="caregivers">شركاء الرعاية</button>
-    <button class="panel-btn" data-go="insights">المساعد الذكي</button>
-    <button class="panel-btn" data-go="health">صحتي والساعة</button>
-    <button class="panel-btn" data-go="settings">الإعدادات</button>
+<!-- لوحة العرض الجانبية (تظهر على الحاسوب فقط) -->
+<aside class="panel">
+  <h1><img src="../assets/icon.png" alt="">جرعة <span class="tag">نموذج تفاعلي</span></h1>
+  <a id="backLink" class="back" href="../index.html">← العودة إلى صفحة التعريف</a>
+  <p>نموذج للعرض فقط: يعمل في المتصفح، لا يتصل بالإنترنت ولا يحفظ بيانات. كل الأسماء وهمية.</p>
+  <div class="pbox"><b>الشاشات</b>
+    <button class="pbtn" data-go="home">الرئيسية</button>
+    <button class="pbtn" data-go="meds">الأدوية</button>
+    <button class="pbtn" data-go="calendar">التقويم الشهري</button>
+    <button class="pbtn" data-go="profile">ملفي</button>
+    <button class="pbtn" data-go="appt:a1">تفاصيل الموعد</button>
+    <button class="pbtn" data-go="caregivers">شركاء الرعاية</button>
+    <button class="pbtn" data-go="insights">مساعد الرعاية الذكي</button>
+    <button class="pbtn" id="pWizard">مسار جدولة الدواء (٥ خطوات)</button>
   </div>
-  <div class="bg-card border border-cardb rounded-[14px] p-3">
-    <b class="block mb-2 text-[14.5px]">أوضاع العرض</b>
-    <div class="flex justify-between items-center py-2 px-0.5"><span>الوضع الداكن</span><div class="sw on" id="swDark"></div></div>
-    <div class="flex justify-between items-center py-2 px-0.5"><span>وضع الرعاية</span><div class="sw" id="swAlz"></div></div>
+  <div class="pbox"><b>أوضاع العرض</b>
+    <div class="prow"><span>الوضع المبسّط لكبار السن</span><div class="sw" id="swSimple"></div></div>
+    <div class="prow"><span>الوضع الداكن</span><div class="sw" id="swDark"></div></div>
   </div>
-  <div class="bg-card border border-cardb rounded-[14px] p-3">
-    <b class="block mb-2 text-[14.5px]">اختصارات</b>
-    <button class="panel-btn" id="btnNotify">محاكاة إشعار جرعة</button>
-    <button class="panel-btn" id="btnReset">إعادة ضبط البيانات</button>
+  <div class="pbox"><b>اختصارات</b>
+    <button class="pbtn" id="btnNotify">محاكاة تنبيه جرعة</button>
+    <button class="pbtn" id="btnReset">إعادة ضبط البيانات</button>
   </div>
 </aside>
 
-<!-- أدوات الجوال -->
-<div class="mob-tools hidden fixed top-2 left-2 z-[100] gap-1.5">
-  <a id="backLinkM" href="../index.html" class="hidden text-xs px-2.5 py-1.5 rounded-[10px] border border-cardb bg-card text-ink no-underline">← العرض</a>
-  <button id="mAbout" class="text-xs px-2.5 py-1.5 rounded-[10px] border border-success/40 bg-success/15 text-ink font-bold">★ الخدمات</button>
-  <button id="mDark" class="text-xs px-2.5 py-1.5 rounded-[10px] border border-cardb bg-card text-ink">☾ المظهر</button>
-  <button id="mAlz" class="text-xs px-2.5 py-1.5 rounded-[10px] border border-cardb bg-card text-ink">وضع الرعاية</button>
+<div class="mob-tools">
+  <a id="backLinkM" href="../index.html" style="display:none">← التعريف</a>
+  <button id="mSimple">الوضع المبسّط</button>
+  <button id="mDark">المظهر</button>
 </div>
 
 <!-- إطار الهاتف -->
-<div class="phone w-[390px] h-[844px] bg-[#0A0F14] rounded-[54px] p-3 shadow-[0_30px_80px_rgba(0,0,0,.35),inset_0_0_0_2px_#2a333b] relative flex-none" id="phone">
-  <div class="notch absolute top-[22px] left-1/2 -translate-x-1/2 w-[120px] h-[34px] bg-black rounded-[20px] z-50"></div>
-  <div class="screen w-full h-full rounded-[42px] overflow-hidden bg-bg relative flex flex-col transition-colors" id="screen">
-    <div class="status h-[54px] flex-none flex items-end justify-between px-[30px] pb-1.5 text-sm font-bold" dir="ltr"><span>9:41</span><span>●●●● ᯤ ▮▮▮</span></div>
-    <div class="toast absolute top-[70px] left-4 right-4 bg-primary text-white rounded-2xl px-4 py-3 text-[15px] font-bold shadow-[0_10px_30px_rgba(0,0,0,.3)] z-[60] -translate-y-[120px] opacity-0 transition-all duration-300 flex gap-2.5 items-center" id="toast"><span>💊</span><span id="toastText"></span></div>
-    <div id="screens" class="flex-1 min-h-0 flex flex-col"></div>
-    <div class="sheet absolute inset-0 bg-black/45 z-40 hidden items-end backdrop-blur-[3px]" id="sheet"><div class="sheet-in w-full bg-bg rounded-t-[28px] px-4 pt-[18px] pb-[30px] max-h-[88%] overflow-auto" id="sheetIn"></div></div>
+<div class="phone" id="phone">
+  <div class="notch"></div>
+  <div class="screen" id="screen">
+    <div class="screen-art"></div>
+    <div class="status"><span>٢:١٢</span><span dir="ltr" style="letter-spacing:1px">●●●● ᯤ ▮</span></div>
+    <div class="toast" id="toast"><span id="toastIcon"></span><span id="toastText"></span></div>
+    <div id="screens"></div>
+    <div class="modal" id="modal"><div class="mbox" id="modalIn"></div></div>
   </div>
 </div>
 
 <script src="data.js"></script>
 <script>
+/* ============ الأيقونات (خطّية وظيفية) ============ */
+const P = {
+  home:'<path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/>',
+  calendar:'<rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>',
+  pill:'<path d="M10.5 20.5 20.5 10.5a4.95 4.95 0 0 0-7-7l-10 10a4.95 4.95 0 0 0 7 7z"/><path d="m8.5 8.5 7 7"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0 1 14 0"/><circle cx="17" cy="9" r="3"/><path d="M16 16a6 6 0 0 1 6 5"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+  chevL:'<path d="m15 18-6-6 6-6"/>', chevR:'<path d="m9 18 6-6-6-6"/>',
+  check:'<path d="m5 12 5 5L20 7"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  pin:'<path d="M12 22s7-7 7-12a7 7 0 0 0-14 0c0 5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
+  nav:'<path d="M3 11 22 2l-9 19-2-8z"/>',
+  share:'<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4M12 2v13"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  trash:'<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',
+  steth:'<path d="M4 3v6a5 5 0 0 0 10 0V3"/><path d="M9 14v2a5 5 0 0 0 10 0v-1"/><circle cx="19" cy="12" r="2"/>',
+  drop:'<path d="M12 2.5s-7 7.5-7 12a7 7 0 0 0 14 0c0-4.5-7-12-7-12z"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>',
+  watch:'<rect x="6" y="7" width="12" height="10" rx="3"/><path d="M9 7V3h6v4M9 17v4h6v-4M12 10v3h2"/>',
+  clip:'<rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 4V2h6v2M9 12h6M9 16h6"/>',
+  brain:'<path d="M9.5 3a2.5 2.5 0 0 0-2.5 2.5V6a3 3 0 0 0-2 5.2 3 3 0 0 0 1 5.8 2.5 2.5 0 0 0 4.5 1.5V3zM14.5 3a2.5 2.5 0 0 1 2.5 2.5V6a3 3 0 0 1 2 5.2 3 3 0 0 1-1 5.8 2.5 2.5 0 0 1-4.5 1.5V3z"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  camera:'<path d="M4 8h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m21 16-5-5-8 8"/>',
+  mic:'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4M8 21h8"/>',
+  qr:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v2M17 20h4M14 20h1"/>',
+  scan:'<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+  help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/>',
+  alertT:'<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/>',
+  heart:'<path d="M12 21s-8-5.3-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.7-8 11-8 11z"/>',
+  activity:'<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+  box:'<path d="m3 7 9-4 9 4v10l-9 4-9-4z"/><path d="m3 7 9 4 9-4M12 11v10"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+  paste:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>',
+  zoom:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5M11 8v6M8 11h6"/>',
+  sparkle:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 17l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
+  id:'<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.5"/><path d="M14 10h5M14 14h5M4 18a4 4 0 0 1 8 0"/>',
+  lock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+  cloud:'<path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4 4 0 0 1 0 9z"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon:'<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>',
+  bellOff:'<path d="M8.5 4.2A6 6 0 0 1 18 8c0 3 .7 5 1.5 6.3M6 8c0 7-3 9-3 9h14M13.7 21a2 2 0 0 1-3.4 0M3 3l18 18"/>',
+  refresh:'<path d="M21 12a9 9 0 1 1-2.6-6.4M21 3v6h-6"/>',
+  hospital:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 7v6M9 10h6M8 21v-4h8v4"/>',
+  hourglass:'<path d="M6 2h12M6 22h12M8 2v4l4 4 4-4V2M8 22v-4l4-4 4 4v4"/>',
+  sunset:'<path d="M17 15a5 5 0 0 0-10 0M12 3v6M4 15h16M2 19h20M8 7l1.5 1.5M16 7l-1.5 1.5"/>',
+  mapIcon:'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/>',
+  stepsIcon:'<path d="M4 16c0-3 2-5 4-5s3 2 3 4-1 4-3 4-4 0-4-3zM13 8c0-3 2-5 4-5s3 2 3 4-1 4-3 4-4 0-4-3z"/>',
+  scale:'<path d="M6 3h12l2 7H4z"/><path d="M12 10v11M7 21h10"/>',
+  tag:'<path d="M20 13 11 22 2 13V4h9z"/><circle cx="7" cy="8" r="1.5"/>',
+  shield:'<path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5z"/><path d="m9 12 2 2 4-4"/>',
+  megaphone:'<path d="M3 11v2l11 4V7zM14 9a3 3 0 0 1 0 6M6 14v5h3v-4"/>',
+  flask:'<path d="M9 3h6M10 3v6L4 20h16l-6-11V3"/>',
+  smile:'<circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>',
+  walk:'<circle cx="13" cy="4" r="1.5"/><path d="m8 21 3-7 3 2 2 5M9 11l3-3 3 2 3-1M11 8l-3 3-1 4"/>',
+  salad:'<path d="M4 12h16a8 8 0 0 1-16 0z"/><path d="M8 12V8a4 4 0 0 1 8 0v4M12 4v2"/>',
+};
+const ic = (n, s = 22, extra = '') => `<svg class="ic" style="width:${s}px;height:${s}px" viewBox="0 0 24 24" ${extra}>${P[n]}</svg>`;
+
+/* ============ الحالة والأدوات ============ */
 const D = window.DEMO;
 const $ = (s, r = document) => r.querySelector(s);
-const state = { screen: 'about', onb: 0, cups: D.water.cups, meds: JSON.parse(JSON.stringify(D.medications)), tab: 'home', alz: false };
+const fresh = () => ({ screen: 'home', tab: 'home', meds: JSON.parse(JSON.stringify(D.medications)), water: D.water.ml, simple: false, banner: true, suggest: true, wiz: null, period: 'شهر', calFilter: 'all' });
+let state = fresh();
+if (window.self === window.top) { $('#backLink').classList.add('show'); $('#backLinkM').style.display = 'inline-block'; }
 
-/* زر الرجوع يظهر فقط عندما يُفتح النموذج مستقلاً، لا داخل إطار صفحة العرض */
-if (window.self === window.top) { $('#backLink').classList.replace('hidden', 'flex'); $('#backLinkM').classList.replace('hidden', 'inline-flex'); }
-
-/* ---------- أدوات ---------- */
-const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
-const t12 = t => { const [h, m] = t.split(':').map(Number); const p = h < 12 ? 'ص' : 'م'; return `${ar(((h + 11) % 12) + 1)}:${ar(String(m).padStart(2, '0'))} ${p}`; };
+const t12 = t => { const [h, m] = t.split(':').map(Number); const p = h < 12 ? 'ص' : 'م'; return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${p}`; };
 const addMin = (t, n) => { let [h, m] = t.split(':').map(Number); m += n; h = (h + Math.floor(m / 60)) % 24; m %= 60; return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`; };
-function toast(msg) { $('#toastText').textContent = msg; const el = $('#toast'); el.classList.remove('-translate-y-[120px]', 'opacity-0'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.add('-translate-y-[120px]', 'opacity-0'), 2600); }
-function sheet(html) { $('#sheetIn').innerHTML = `<div class="w-10 h-1 rounded-sm bg-sep mx-auto mb-3.5"></div>${html}`; $('#sheet').classList.replace('hidden', 'flex'); }
-function closeSheet() { $('#sheet').classList.replace('flex', 'hidden'); }
-$('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet') closeSheet(); });
+function toast(msg, icon = 'check') { $('#toastIcon').innerHTML = ic(icon, 20); $('#toastText').textContent = msg; const el = $('#toast'); el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2800); }
+function modal(html) { $('#modalIn').innerHTML = html; $('#modal').classList.add('show'); bindModal(); }
+function closeModal() { $('#modal').classList.remove('show'); state.wiz = null; }
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
 
 const takenCount = () => state.meds.filter(m => m.status === 'taken').length;
 const nextDue = () => state.meds.find(m => m.status === 'due') || state.meds.find(m => m.status === 'upcoming');
+const pillIcon = m => `<div class="pillicon" style="background:${m.color}">${ic('pill', 20)}</div>`;
+const sw = on => `<div class="sw ${on ? 'on' : ''}" data-sw></div>`;
 
-/* ---------- أجزاء مشتركة ---------- */
-const appbar = (title, right = '', left = '') => `<div class="appbar">${right}<h2>${title}</h2>${left || '<span class="w-11"></span>'}</div>`;
-const back = to => `<button class="ib" data-go="${to}">‹</button>`;
-const nav = () => `
-<div class="nav absolute bottom-[18px] left-4 right-4 h-16 rounded-[22px] bg-nav backdrop-blur-xl border border-cardb flex items-center justify-around shadow-[0_10px_30px_rgba(0,0,0,.12)] z-20">
-  <button class="nav-btn ${state.tab === 'home' ? 'on' : ''}" data-go="home"><span>⌂</span>الرئيسية</button>
-  <button class="nav-btn ${state.tab === 'calendar' ? 'on' : ''}" data-go="calendar"><span>▦</span>التقويم</button>
-  <div class="fab" id="fab">+</div>
-  <button class="nav-btn ${state.tab === 'meds' ? 'on' : ''}" data-go="meds"><span>💊</span>الأدوية</button>
-  <button class="nav-btn ${state.tab === 'profile' ? 'on' : ''}" data-go="profile"><span>◯</span>ملفي</button>
-</div>`;
-const view = (inner, top = '') => `<div class="view flex-1 overflow-y-auto overflow-x-hidden px-4 pb-[110px] ${top}">${inner}</div>`;
-const pillIcon = m => `<div class="pill" style="background:${m.color}">${m.form === 'كبسولة' ? '💊' : '⚪'}</div>`;
-const tog = on => `<div class="sw ${on ? 'on' : ''}" data-sw></div>`;
+/* ============ أجزاء مشتركة ============ */
+const appbar = (title, { back = null, right = '', left = '' } = {}) => `<div class="appbar">
+  ${back ? `<button class="ib" data-go="${back}" aria-label="رجوع">${ic('chevR')}</button>` : (right || '<span class="spacer"></span>')}
+  <h2>${title}</h2>${left || '<span class="spacer"></span>'}</div>`;
+const nav = () => `<div class="nav">
+  <button class="nb ${state.tab === 'home' ? 'on' : ''}" data-go="home">${ic('home')}الرئيسية</button>
+  <button class="nb ${state.tab === 'calendar' ? 'on' : ''}" data-go="calendar">${ic('calendar')}التقويم</button>
+  <button class="fab" id="fab" aria-label="إضافة">${ic('plus')}</button>
+  <button class="nb ${state.tab === 'meds' ? 'on' : ''}" data-go="meds">${ic('pill')}الأدوية</button>
+  <button class="nb ${state.tab === 'profile' ? 'on' : ''}" data-go="profile">${ic('user')}ملفي</button></div>`;
+const view = inner => `<div class="view">${inner}</div>`;
+const head = (icon, cls, title, sub) => `<div class="row"><div class="icbox ${cls}">${ic(icon)}</div><div class="col" style="flex:1"><h3 style="margin:0">${title}</h3><div class="sub">${sub}</div></div></div>`;
 
-/* ---------- الشاشات ---------- */
+/* ============ الشاشات ============ */
 const S = {};
 
-S.onboarding = () => {
-  const cards = [
-    { art: '⏰', h: 'تذكير دقيق بكل جرعة', p: 'جدولة ذكية لأدويتك مع تنبيه منطوق بالعربية، وتأجيل بلمسة، وخصم تلقائي من المخزون.' },
-    { art: '🏥', h: 'مواعيدك من رسائل موعدي', p: 'يقرأ التطبيق رسائل المواعيد الرسمية ويحوّلها إلى موعد في التقويم مع تنبيه مسبق.' },
-    { art: '🫶', h: 'وضع الرعاية لكل من يحتاج متابعة', p: 'واجهة مكبّرة ومبسّطة للمريض، كبيراً كان أو صغيراً، وشاشة متابعة لحظية لمن يرعاه مع نطاق آمن.' },
-  ];
-  const c = cards[state.onb];
-  return `<div class="flex-1 flex flex-col px-6 pt-5 pb-[30px] text-center">
-    <div class="row sb"><button class="btn-n h-9 text-[14.5px]" data-go="login">تخطي</button><button class="btn-n h-9 text-[14.5px] !text-success" data-go="about">★ التطبيق والخدمات</button></div>
-    <div class="flex-1 grid place-items-center text-[96px]">${c.art}</div>
-    <h2 class="text-[26px] font-extrabold mb-2.5">${c.h}</h2><p class="text-muted leading-[1.9] text-[16px] mb-7 px-1">${c.p}</p>
-    <div class="flex gap-1.5 justify-center mb-5">${cards.map((_, i) => `<i class="h-2 rounded ${i === state.onb ? 'w-[22px] bg-success' : 'w-2 bg-sep'}"></i>`).join('')}</div>
-    <button class="btn-g btn-full" id="onbNext">${state.onb < 2 ? 'التالي' : 'ابدأ الآن'}</button>
-  </div>`;
-};
-
-S.login = () => view(`
-  <div class="row sb"><span class="w-11"></span><button class="btn-n h-9 text-[14.5px]" data-go="home">تخطي ◀</button></div>
-  <div class="text-center mt-2.5"><img src="../assets/icon.png" class="w-14 h-14 rounded-[14px] inline-block"></div>
-  <h2 class="text-center text-[26px] font-extrabold mt-3.5">تسجيل الدخول</h2>
-  <p class="text-center sub mt-2 !text-[15px]">يرجى تسجيل الدخول أو إنشاء حساب لمتابعة رعاية صحتك</p>
-  <div class="flex bg-field rounded-[22px] p-1 h-11 mt-[18px] mb-5"><div class="seg-opt on">🔑 تسجيل الدخول</div><div class="seg-opt">👤 إنشاء حساب جديد</div></div>
-  <div class="field">📧 <span class="opacity-80">البريد الإلكتروني أو رقم الجوال</span></div>
-  <div class="field">🔒 <span class="opacity-80 flex-1">كلمة المرور</span>👁</div>
-  <div class="text-left mt-1 mb-4"><span class="sub !text-tint">نسيت كلمة المرور؟</span></div>
-  <button class="btn-g btn-full" data-go="home">تسجيل الدخول</button>
-  <div class="row my-[18px] gap-2.5"><div class="hr flex-1 my-0"></div><span class="sub">أو من خلال</span><div class="hr flex-1 my-0"></div></div>
-  <div class="flex gap-2.5"><button class="btn flex-1 rounded-3xl text-sm bg-black text-white" data-go="home"> Apple</button><button class="btn flex-1 rounded-3xl text-sm bg-card text-ink border border-sep" data-go="home"><b class="text-[#4285F4]">G</b> Google</button></div>
-  <p class="text-center mt-[18px] text-[14.5px]">ليس لديك حساب؟ <b class="text-success">إنشاء حساب جديد</b></p>
-  <p class="text-center sub mt-6 !text-[13px]">🔒 بياناتك مشفرة بالكامل وتخضع لسياسة الخصوصية الطبية</p>`, 'pt-2');
-
 S.home = () => {
-  const due = nextDue();
-  const taken = takenCount(), total = state.meds.length;
-  const morning = state.meds.filter(m => +m.time.slice(0, 2) < 12);
-  const evening = state.meds.filter(m => +m.time.slice(0, 2) >= 12);
-  const item = m => `<div class="item ${m.status === 'taken' ? 'done' : ''} ${m.status === 'missed' ? 'missed' : ''}">
-      ${pillIcon(m)}<div class="flex-1"><div class="n">${m.name} · ${m.dose}</div><div class="sub">${m.note}${m.snoozed ? ' · مؤجّل' : ''}</div></div>
-      <div class="t">${t12(m.time)}</div>${m.status === 'taken' ? '<span class="text-success font-extrabold check-pop">✓</span>' : m.status === 'due' ? '<span class="chip bg-warning/20 text-warning">الآن</span>' : ''}
-    </div>`;
+  const due = nextDue(), taken = takenCount(), total = state.meds.length;
+  const morning = state.meds.filter(m => +m.time.slice(0, 2) < 12), evening = state.meds.filter(m => +m.time.slice(0, 2) >= 12);
+  const item = m => `<div class="item ${m.status === 'taken' ? 'done' : ''}">${pillIcon(m)}<div style="flex:1"><div class="n">${m.name} · ${m.dose}</div><div class="sub">${m.note}${m.snoozed ? ' · مؤجّلة' : ''}</div></div><div class="t">${t12(m.time)}</div>${m.status === 'taken' ? `<span style="color:var(--green)">${ic('check', 20)}</span>` : m.status === 'due' ? '<span class="chip chip-y">الآن</span>' : ''}</div>`;
   return view(`
-    <div class="appbar !border-0 !bg-transparent !backdrop-blur-none !mb-0">
-      <button class="ib bell" data-go="alerts">🔔</button><span></span><button class="ib" data-go="profile">◯</button>
+    ${appbar('المتابعة اليومية', { right: `<button class="ib alert" data-go="alerts">${ic('bell')}</button>`, left: `<button class="ib" data-go="profile">${ic('user')}</button>` })}
+    <div class="row sb" style="margin-bottom:6px">
+      <div><div class="hello">مرحباً، ${D.patient.fullName} 👋</div><div class="sub">${D.today.g} · ${D.today.h}</div></div>
+      <div class="ring" style="--p:${Math.round(taken / total * 100)}"><span><b>${taken}/${total}</b>جرعات</span></div>
     </div>
-    <div class="flex justify-between items-center mt-1 mb-3.5">
-      <div><h2 class="text-[24px] font-extrabold">مرحباً، ${D.patient.name} 👋</h2><div class="sub">الأحد ٢٥ أكتوبر ٢٠٢٦ · ١٣ جمادى الأولى ١٤٤٨</div></div>
-      <div class="ring w-[66px] h-[66px] rounded-full grid place-items-center relative flex-none" style="--p:${Math.round(taken / total * 100)}"><b class="relative z-[1] text-[14.5px]">${ar(taken)}/${ar(total)}</b></div>
-    </div>
-    <div class="hide-alz flex gap-2 justify-between mb-3.5">${D.week.map(w => `<div class="day ${w.today ? 'today' : ''}"><span>${w.d}</span><b>${ar(w.n)}</b><div class="dots">${w.dots.map(c => `<i style="background:${c}"></i>`).join('')}</div></div>`).join('')}</div>
+    <div class="week hide-simple">${D.week.map(w => `<div class="day ${w.today ? 'today' : ''}"><span>${w.d}</span><b>${w.n}</b><div class="dots"><i style="background:${w.today ? '#fff' : 'var(--green)'}"></i>${w.n === 29 ? '<i style="background:#fff"></i>' : ''}</div></div>`).join('')}</div>
 
-    ${due ? `<div class="due relative rounded-2.5xl p-0.5 mb-3.5"><div class="bg-card rounded-[18px] p-4">
-      <div class="bigpill hidden w-[100px] h-[100px] rounded-[26px] place-items-center text-[52px] mx-auto mb-3 bg-field" style="background:${due.color}">${due.form === 'كبسولة' ? '💊' : '⚪'}</div>
-      <div class="row sb"><div><div class="sub">الجرعة التالية</div><div class="due-name text-[22px] font-extrabold">${due.name} · ${due.dose}</div><div class="sub">${due.note}</div></div>${pillIcon(due)}</div>
-      <div class="text-[14.5px] text-warning font-bold mt-2">${due.status === 'due' ? '⏰ حان وقتها الآن' : `⏳ الساعة ${t12(due.time)}`}</div>
-      <div class="flex gap-2.5 mt-3.5"><button class="btn-g due-act flex-1 h-[46px] ${due.status === 'due' ? 'pulse' : ''}" data-take="${due.id}">✓ تم التناول</button><button class="btn-n due-act flex-1 h-[46px] hide-alz" data-snooze="${due.id}">تأجيل ١٥ د</button></div>
-    </div></div>` : `<div class="card text-center"><div class="text-[40px]">🎉</div><h3>أكملتِ جرعات اليوم</h3><div class="sub">التزام ممتاز، استمري</div></div>`}
+    ${due ? `<div class="due"><div>
+      <div class="bigpill" style="display:none;width:100px;height:100px;border-radius:26px;place-items:center;margin:0 auto 12px;background:${due.color};color:var(--primary)">${ic('pill', 52)}</div>
+      <div class="row sb"><div><div class="sub">الجرعة التالية</div><div class="name">${due.name} · ${due.dose}</div><div class="sub">${due.note}</div></div>${pillIcon(due)}</div>
+      <div class="row" style="color:var(--gold);font-weight:700;font-size:14.5px;margin-top:6px;gap:6px">${ic('clock', 18)}${due.status === 'due' ? 'حان وقتها الآن' : `الساعة ${t12(due.time)}`}</div>
+      <div class="row" style="margin-top:14px"><button class="btn btn-g due-act ${due.status === 'due' ? 'pulse' : ''}" data-take="${due.id}">${ic('check', 20)} تم التناول</button><button class="btn btn-n due-act hide-simple" data-snooze="${due.id}">تأجيل 15 دقيقة</button></div>
+    </div></div>` : `<div class="card" style="text-align:center"><div class="icbox g" style="margin:0 auto 8px">${ic('check')}</div><h3>أكملت جرعات اليوم</h3><div class="sub">التزام ممتاز، استمر</div></div>`}
 
-    <div class="card"><h3>جدول اليوم</h3>
-      <div class="sub mb-1.5">☀️ الصباح</div><div class="flex flex-col gap-2.5">${morning.map(item).join('')}</div>
-      <div class="sub mt-3 mb-1.5">🌙 المساء والليل</div><div class="flex flex-col gap-2.5">${evening.map(item).join('')}</div>
-      <div class="sub mt-3 mb-1.5">🏥 المواعيد القادمة</div>
-      <div class="flex flex-col gap-2.5">${D.appointments.map(a => `<div class="item appt" data-go="appt:${a.id}"><div class="flex-1"><div class="n">${a.title}</div><div class="sub">${a.date} · ${t12(a.time)}</div></div><span class="text-appt">›</span></div>`).join('')}</div>
-    </div>
+    ${state.suggest && !state.simple ? `<div class="card hide-simple">${head('brain', 'p', 'الوضع المبسّط يناسب حالتك', 'لكبار السن وأصحاب الأمراض المزمنة والمستعصية والزهايمر: شاشة بعناصر كبيرة، تذكير بصوت القريب، وكيل رعاية يسمعك ويجيبك، وعائلة تتابعك بهدوء.')}
+      <div class="row" style="margin-top:12px"><button class="btn btn-sm" style="flex:1;background:#7C6BB5;color:#fff" id="enableSimple">${ic('check', 18)} تفعيل الوضع المبسّط</button><button class="btn btn-sm btn-n" id="dismissSuggest">ليس الآن</button></div></div>` : ''}
 
-    <div class="card hide-alz"><div class="row sb"><h3 class="!mb-0">💧 شرب الماء</h3><span class="sub">${ar(state.cups)} من ${ar(D.water.goal)} أكواب</span></div>
-      <div class="flex gap-1.5 mt-2">${Array.from({ length: D.water.goal }, (_, i) => `<div class="cup ${i < state.cups ? 'f' : ''}" data-cup="${i + 1}">${i < state.cups ? '💧' : ''}</div>`).join('')}</div>
-    </div>
+    ${state.banner ? `<div class="banner hide-simple"><button class="x" id="closeBanner">${ic('x', 16)}</button>
+      <div class="row"><div class="icbox" style="background:rgba(255,255,255,.25)">${ic('megaphone')}</div><div><b style="font-size:17px">شهر التوعية بسرطان الثدي</b><div style="opacity:.9;font-size:14px">الكشف المبكر ينقذ الحياة.</div></div></div>
+      <div class="row" style="margin-top:12px"><button class="btn btn-sm btn-pill" style="flex:1;background:rgba(255,255,255,.2);color:#fff" data-toast="فتح صفحة الحملة">${ic('info', 16)} اعرف المزيد</button><button class="btn btn-sm btn-pill" style="flex:1;background:#fff;color:var(--coral)" data-toast="حجز موعد تصوير الماموغرام">${ic('calendar', 16)} حجز موعد</button></div></div>` : ''}
 
-    <div class="card hide-alz !border-0 text-white bg-gradient-to-br from-primary/90 to-success/85">
-      <div class="sub !text-white/75">حملة توعوية · وزارة الصحة</div>
-      <h3 class="!text-white my-1">الشهر العالمي للتوعية بالسكري</h3>
-      <div class="text-[14.5px] opacity-90">اختبار خطر ما قبل السكري يستغرق دقيقتين. <b>ابدأ التقييم ←</b></div>
+    <div class="card hide-simple"><div class="row sb"><div class="row"><div class="icbox soft-b">${ic('drop')}</div><div><h3>شرب الماء</h3><div class="sub">${state.water.toLocaleString('en-US')} من ${D.water.goal.toLocaleString('en-US')} مل اليوم</div></div></div><button class="btn btn-sm btn-a" id="addWater">${ic('drop', 16)} إضافة ماء</button></div>
+      <div class="water-wave"><i style="width:${Math.min(100, state.water / D.water.goal * 100)}%"></i></div></div>
+
+    <div class="card">${head('pill', 'soft-g', 'أدوية اليوم', `${taken} من ${total} جرعات أُخذت`)}
+      <div class="sub" style="margin:12px 0 6px">☀️ الصباح</div>${morning.map(item).join('')}
+      <div class="sub" style="margin:12px 0 6px">🌙 المساء والليل</div>${evening.map(item).join('')}
+      <div class="sub" style="margin:12px 0 6px">المواعيد القادمة</div>
+      ${D.appointments.map(a => `<div class="item appt" data-go="appt:${a.id}"><div class="icbox sm b">${ic('steth')}</div><div style="flex:1"><div class="n">${a.title}</div><div class="sub">${a.date} · ${t12(a.time)}</div></div>${ic('chevL', 18)}</div>`).join('')}
     </div>`) + nav();
 };
 
-S.meds = () => view(`
-  ${appbar('أدويتي', '<button class="ib" id="addMed">＋</button>', back('home'))}
-  <div class="row mb-3.5"><div class="stat"><b>${ar(state.meds.length)}</b><small>أدوية نشطة</small></div><div class="stat"><b class="!text-success">٩٤٪</b><small>الالتزام الشهري</small></div><div class="stat"><b class="!text-alert">١</b><small>مخزون منخفض</small></div></div>
-  ${state.meds.map(m => { const pct = Math.round(m.stock / m.total * 100); return `<div class="med" data-go="med:${m.id}">${pillIcon(m)}
-    <div class="flex-1"><div class="row sb"><b>${m.name} · ${m.dose}</b><span class="sub">${t12(m.time)}</span></div>
-    <div class="sub">${m.note} · تبقّى ${ar(m.stock)} من ${ar(m.total)}</div><div class="bar"><i class="${pct < 25 ? 'low' : ''}" style="width:${pct}%"></i></div></div></div>`; }).join('')}
-  <div class="card mt-1.5"><h3>🔎 كتالوج الأدوية والتفاعلات</h3><div class="sub">اكتب الاسم التجاري كما على العبوة ويتعرّف التطبيق على المادة الفعالة وفئتها ويحذّر من التفاعلات بين أدويتك.</div>
-    <div class="field mt-3 !mb-0">🔍 <span class="opacity-80">مثال: بانادول، جلوكوفاج…</span></div></div>
-  <div class="card"><h3>📄 وصفتي</h3><div class="sub">استيراد الأدوية مباشرة من رسالة «وصفتي» النصية. آخر استيراد: ٣ أدوية في ١٢ أكتوبر.</div></div>`) + nav();
+S.alerts = () => view(`${appbar('التنبيهات', { back: 'home' })}
+  <div class="card list">${[['clock', 'y', 'حان وقت أتورفاستاتين 20 ملغ', 'الآن · مع الغداء'], ['steth', 'b', 'تذكير: مراجعة عيادة السكري بعد 6 أيام', 'قبل ساعتين'], ['users', 'g', 'سارة قبِلت دعوة شريك الرعاية', 'أمس'], ['box', 'y', 'مخزون أتورفاستاتين يكفي 6 أيام', 'أمس'], ['drop', 'b', 'لم تسجّل شرب الماء منذ 3 ساعات', 'أمس']].map(([i, c, t, w]) => `<div class="li"><div class="icbox ${c}">${ic(i)}</div><div><b>${t}</b><div class="sub">${w}</div></div></div>`).join('')}</div>`) + nav();
+
+S.meds = () => view(`${appbar('الأدوية')}
+  <div class="card">${head('pill', 'g', `${state.meds.length} أدوية نشطة`, state.meds.some(m => m.stock / m.total < .25) ? 'مخزون أتورفاستاتين ينفد خلال 6 أيام.' : 'المخزون كافٍ لجميع الأدوية.')}</div>
+  <div class="card">${head('mail', 'soft-b', 'رسائل وصفتي', 'وصلتك رسالة وصفة طبية من «وصفتي»؟ انسخها ثم الصقها هنا ليتعرّف عليها جرعة.')}<button class="btn btn-full btn-a" style="margin-top:12px" data-toast="لُصقت الرسالة: وُجد دواءان، أُضيفا إلى المراجعة">${ic('paste', 18)} لصق</button></div>
+  <div class="card">${head('scan', 'soft-p', 'استيراد من وصفة', 'الصق نص الوصفة أو ارفع صورة شاشة لها، ويفرز جرعة الأدوية المعروفة منها تلقائياً.')}<button class="btn btn-full btn-p" style="margin-top:12px" id="importRx">${ic('zoom', 18)} استيراد الآن</button></div>
+  ${state.meds.map(m => { const pct = Math.round(m.stock / m.total * 100); return `<div class="card" style="padding:14px;cursor:pointer" data-go="med:${m.id}"><div class="row">${pillIcon(m)}<div style="flex:1"><div class="row sb"><b>${m.name} · ${m.dose}</b><span class="sub">${t12(m.time)}</span></div><div class="sub">${m.note} · تبقّى ${m.stock} من ${m.total}</div><div class="bar"><i class="${pct < 25 ? 'low' : ''}" style="width:${pct}%"></i></div></div></div></div>`; }).join('')}`) + nav();
 
 S.med = id => { const m = state.meds.find(x => x.id === id); const pct = Math.round(m.stock / m.total * 100); return view(`
-  ${appbar(m.name, '<button class="ib">✎</button>', back('meds'))}
-  <div class="card text-center"><div class="pill !w-[84px] !h-[84px] !rounded-3xl !text-[40px] mx-auto mb-2.5" style="background:${m.color}">${m.form === 'كبسولة' ? '💊' : '⚪'}</div>
-    <h3 class="!text-xl">${m.name} ${m.dose}</h3><div class="sub">${m.form} · يومياً الساعة ${t12(m.time)} · ${m.note}</div></div>
-  <div class="card"><div class="row sb"><h3 class="!mb-0">المخزون</h3><span class="chip ${pct < 25 ? 'bg-alert/15 text-alert' : 'bg-success/15 text-success'}">${pct < 25 ? 'ينفد قريباً' : 'كافٍ'}</span></div>
-    <div class="bar !h-2.5"><i class="${pct < 25 ? 'low' : ''}" style="width:${pct}%"></i></div>
-    <div class="sub mt-2">تبقّى ${ar(m.stock)} ${m.form === 'كبسولة' ? 'كبسولة' : 'قرصاً'} من ${ar(m.total)} · يكفي ${ar(m.stock)} يوماً</div>
-    <button class="btn-p btn-full mt-3 !h-[46px]" id="refill">✓ تأكيد إعادة التعبئة</button></div>
-  <div class="card"><h3>سجل الالتزام · آخر ٧ أيام</h3><div class="flex items-end gap-1.5 h-[70px] mt-2">${D.adherenceWeek.map(v => `<i class="flex-1 rounded-t-md rounded-b-sm opacity-85 ${v < 70 ? 'bg-warning' : 'bg-success'}" style="height:${v}%"></i>`).join('')}</div>
-    <div class="row sb sub mt-1.5"><span>س</span><span>ح</span><span>ن</span><span>ث</span><span>ر</span><span>خ</span><span>ج</span></div>
-    <div class="hr"></div><div class="row sb"><span class="sub">نسبة الالتزام الشهرية</span><b class="text-success">${ar(m.adherence)}٪</b></div></div>
-  <div class="card"><h3>ℹ️ معلومات الدواء</h3><div class="sub leading-[1.9]">المادة الفعالة والفئة الدوائية والتعليمات الشائعة تُعرض هنا من كتالوج الأدوية، مع تحذير التفاعلات إن وُجد.</div></div>`) + nav(); };
+  ${appbar(m.name, { back: 'meds', left: `<button class="ib" data-toast="فتح تعديل الدواء">${ic('edit')}</button>` })}
+  <div class="card" style="text-align:center"><div class="pillicon" style="width:84px;height:84px;border-radius:24px;margin:0 auto 10px;background:${m.color}">${ic('pill', 40)}</div><h3 style="font-size:20px">${m.name} ${m.dose}</h3><div class="sub">${m.form} · يومياً الساعة ${t12(m.time)} · ${m.note}</div><div class="row" style="justify-content:center;gap:6px;margin-top:8px"><span class="chip chip-n">${m.active}</span><span class="chip chip-b">${m.cls}</span></div></div>
+  <div class="card"><div class="row sb"><h3>المخزون</h3><span class="chip ${pct < 25 ? 'chip-c' : 'chip-g'}">${pct < 25 ? 'ينفد قريباً' : 'كافٍ'}</span></div><div class="bar" style="height:10px"><i class="${pct < 25 ? 'low' : ''}" style="width:${pct}%"></i></div><div class="sub" style="margin-top:8px">تبقّى ${m.stock} من ${m.total} · يكفي ${m.stock} يوماً</div><button class="btn btn-full btn-p" style="margin-top:12px;height:46px" id="refill">${ic('box', 18)} تأكيد إعادة التعبئة</button></div>
+  <div class="card"><h3>سجل الالتزام · آخر 7 أيام</h3><div class="bars">${D.adherenceWeek.map(v => `<i class="${v < 70 ? 'lo' : ''}" style="height:${v}%"></i>`).join('')}</div><div class="row sb sub" style="margin-top:6px"><span>س</span><span>ح</span><span>ن</span><span>ث</span><span>ر</span><span>خ</span><span>ج</span></div><div class="hr"></div><div class="row sb"><span class="sub">نسبة الالتزام الشهرية</span><b style="color:var(--green)">${m.adherence}٪</b></div></div>
+  <div class="card">${head('shield', 'soft-g', 'فحص التفاعلات', 'لا تعارض مع أدويتك الحالية. المادة الفعالة غير مكررة.')}</div>`) + nav(); };
+
+S.calendar = () => { const f = state.calFilter; return view(`${appbar('التقويم')}
+  <div class="card" style="padding:12px 16px"><div class="row sb"><button class="ib ghost">${ic('chevR')}</button><div style="text-align:center"><b style="font-size:20px">أكتوبر 2026</b><div class="sub">ربيع الآخر، 1448 هـ</div></div><span class="chip chip-g">اليوم</span><button class="ib ghost">${ic('chevL')}</button></div></div>
+  <div class="seg" style="margin-bottom:14px"><button class="${f === 'all' ? 'on' : ''}" data-cal="all">${ic('calendar', 16)} الكل</button><button class="${f === 'med' ? 'on' : ''}" data-cal="med">${ic('pill', 16)} الأدوية</button><button class="${f === 'appt' ? 'on' : ''}" data-cal="appt">${ic('steth', 16)} المواعيد</button></div>
+  <div class="card"><div class="grid7">${['س', 'ح', 'ن', 'ث', 'ر', 'خ', 'ج'].map((d, i) => `<div class="h" style="${i === 6 ? 'color:var(--green)' : ''}">${d}</div>`).join('')}
+    ${D.month.map(c => `<div class="gc ${c.other ? 'other' : ''} ${c.today ? 'today' : ''}">${c.d}<div class="dots">${(c.dots || []).filter(x => f === 'all' || (f === 'med' && x === '#2D8A6B') || (f === 'appt' && x !== '#2D8A6B')).map(x => `<i style="background:${c.today ? '#fff' : x}"></i>`).join('')}</div></div>`).join('')}</div>
+    <div class="hr"></div><div class="row" style="gap:14px;font-size:12.5px"><span class="row" style="gap:5px"><i class="dots" style="display:block;width:8px;height:8px;border-radius:50%;background:var(--green)"></i>أدوية</span><span class="row" style="gap:5px"><i style="display:block;width:8px;height:8px;border-radius:50%;background:var(--appt)"></i>مواعيد</span><span class="row" style="gap:5px"><i style="display:block;width:8px;height:8px;border-radius:50%;background:var(--coral)"></i>جرعة فائتة</span></div></div>
+  <div class="card"><div class="row sb"><div class="row"><div class="ring" style="--p:75"><span><b>3/4</b>جرعات</span></div><div><h3>الالتزام هذا الشهر</h3><div class="sub">تناولت 3 من 4 جرعة مستحقة (75٪).</div></div></div><div class="stat" style="flex:none;padding:8px 14px"><b style="color:var(--appt)">0</b><small>مواعيد</small></div></div></div>
+  <div class="card">${head('clip', 'soft-p', 'الخميس، 29 أكتوبر', '5 جرعات · لا مواعيد اليوم')}<div style="margin-top:10px">${state.meds.map(m => `<div class="item ${m.status === 'taken' ? 'done' : ''}" style="margin-bottom:8px">${pillIcon(m)}<div style="flex:1"><div class="n">${m.name}</div><div class="sub">${m.dose}</div></div><div class="t">${t12(m.time)}</div></div>`).join('')}</div></div>
+  <div class="card" style="border-right:4px solid var(--gold)">${head('alertT', 'soft-y', 'تنبيه تضارب', 'تحليل السكر التراكمي (8 نوفمبر 8:00 ص) يتطلب صياماً، وجرعة ميتفورمين 7:30 ص مرتبطة بالإفطار. يُقترح نقل الجرعة إلى بعد التحليل.')}</div>`) + nav(); };
 
 S.appt = id => { const a = D.appointments.find(x => x.id === id); return view(`
-  ${appbar('تفاصيل الموعد', '<button class="ib">↗</button>', back('home'))}
-  <div class="card border-r-4 !border-r-appt"><div class="chip bg-appt/15 text-appt mb-2">موعد طبي</div>
-    <h3 class="!text-xl">${a.title}</h3><div class="sub">👩‍⚕️ ${a.doctor}</div><div class="sub">📍 ${a.place}</div>
-    <div class="hr"></div><div class="row sb"><div><div class="sub">التاريخ</div><b>${a.date}</b></div><div><div class="sub">الساعة</div><b>${t12(a.time)}</b></div></div>
-    <div class="hr"></div><div class="sub">🔔 ${a.reminder}</div>
-    <div class="sub mt-1.5 !text-success">✨ ${a.source}</div></div>
-  <div class="flex gap-2.5 mb-3.5"><button class="btn-p flex-1" data-toast="فتح الخرائط للتوجيه إلى ${a.place}">🗺 التوجيه</button><button class="btn-n flex-1" data-toast="مشاركة الموعد عبر واتساب">↗ مشاركة</button></div>
-  <div class="card"><h3>📎 المرفقات الطبية</h3><div class="row"><div class="stat">📄<small>تحليل سابق</small></div><div class="stat">🩻<small>أشعة</small></div><div class="stat !bg-transparent border border-dashed border-sep">＋<small>مسح ضوئي</small></div></div></div>
-  <button class="btn-n btn-full !text-alert" data-toast="سيُطلب تأكيد الإلغاء">إلغاء الموعد</button>`) + nav(); };
+  ${appbar('تفاصيل الموعد', { back: 'home', left: `<button class="ib" data-toast="مشاركة الموعد عبر واتساب أو الرسائل">${ic('share')}</button>` })}
+  <div class="card"><div class="row" style="align-items:flex-start"><div class="icbox b">${ic('steth')}</div><div style="flex:1"><h3 style="font-size:21px">${a.title}</h3><div class="sub">${a.doctor}</div></div><span class="chip chip-g">قادم</span></div>
+    <div class="row" style="margin-top:12px;gap:8px"><span class="chip chip-n" style="padding:6px 12px;font-size:14px">${ic('calendar', 16)} ${a.date}</span><span class="chip chip-n" style="padding:6px 12px;font-size:14px">${ic('clock', 16)} ${t12(a.time)}</span></div>
+    <div class="row sub" style="margin-top:10px;gap:6px">${ic('hourglass', 16)} ${a.in}</div></div>
+  <div class="card">${head('pin', 'soft-g', 'الموقع', '')}<div class="row" style="margin:10px 0;gap:8px;color:var(--ink)">${ic('hospital', 20)} ${a.place} · ${a.dept}</div><button class="btn btn-full btn-g" data-toast="فتح الخرائط للتوجيه إلى ${a.place}">${ic('nav', 18)} بدء التوجيه</button><div class="sub" style="text-align:center;margin-top:6px;font-size:12.5px">ستختار بين خرائط Apple وGoogle عند الضغط</div></div>
+  <div class="card">${head('clip', 'soft-y', 'التعليمات والتنبيه', '')}<div class="row" style="margin-top:10px;align-items:flex-start;gap:8px">${ic('file', 20)}<span>نوع الموعد: ${a.kind}، رمز الموعد: <span dir="ltr">${a.ref}</span>، المراجع: ${D.patient.fullName}</span></div><div class="hr"></div><div class="row sb"><span class="row" style="gap:8px">${ic('bell', 20)} تنبيه قبل الموعد</span><span class="row" style="color:var(--gold);font-weight:700;gap:4px">${a.reminder} ${ic('chevL', 16)}</span></div><div class="hr"></div><div class="row sub" style="gap:6px;color:var(--green)">${ic('sparkle', 16)} ${a.source}</div></div>
+  <div class="actions"><button data-toast="فتح تعديل الموعد" style="color:var(--primary)">${ic('edit')}تعديل</button><button data-toast="تغيير وقت التنبيه" style="color:var(--gold)">${ic('bell')}تنبيه</button><button data-toast="مشاركة الموعد" style="color:var(--green)">${ic('share')}مشاركة</button><button data-toast="سيُطلب تأكيد الإلغاء" style="color:var(--coral)">${ic('trash')}إلغاء</button></div>`) + nav(); };
 
-S.calendar = () => view(`
-  ${appbar('أكتوبر ٢٠٢٦', '<button class="ib">›</button>', '<button class="ib">‹</button>')}
-  <div class="flex gap-2 mb-3"><span class="chip bg-primary text-white !px-3 !py-1.5">الكل</span><span class="chip bg-field !px-3 !py-1.5">أدوية فقط</span><span class="chip bg-field !px-3 !py-1.5">مواعيد فقط</span></div>
-  <div class="card"><div class="grid grid-cols-7 gap-1 text-center">${['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'].map(d => `<div class="text-[13px] text-muted py-1">${d}</div>`).join('')}
-    ${D.monthDots.map(c => c ? `<div class="grid-c ${c.today ? 'today' : ''}">${ar(c.d)}<div class="dots">${c.dots.map(x => `<i style="background:${x}"></i>`).join('')}</div></div>` : '<div></div>').join('')}</div>
-    <div class="hr"></div><div class="flex gap-3.5 text-xs"><span><i class="inline-block w-2 h-2 rounded-full bg-success"></i> أدوية</span><span><i class="inline-block w-2 h-2 rounded-full bg-appt"></i> مواعيد</span><span><i class="inline-block w-2 h-2 rounded-full bg-alert"></i> جرعة فائتة</span></div></div>
-  <div class="card"><div class="row sb"><h3 class="!mb-0">الالتزام هذا الشهر</h3><b class="text-success text-[22px]">٩٤٪</b></div><div class="bar !h-2.5 mt-2.5"><i style="width:94%"></i></div><div class="sub mt-2">١٤٨ جرعة من ١٥٧ في وقتها · جرعتان فائتتان</div></div>
-  <div class="card border-r-4 !border-r-warning"><h3>⚠️ تنبيه تضارب</h3><div class="sub">موعد تحليل السكر التراكمي (١ نوفمبر ٨:٠٠ ص) يتطلب صياماً، وجرعة ميتفورمين ٧:٣٠ ص مرتبطة بالإفطار. يُقترح نقل الجرعة إلى بعد التحليل.</div></div>`) + nav();
+S.profile = () => view(`${appbar('ملفي')}
+  <div class="card"><div class="row"><div class="avatar">${ic('user', 26)}</div><div style="flex:1"><b style="font-size:19px">${D.patient.fullName}</b><div class="sub">${D.patient.age} سنة · ${D.patient.conditions.length} حالة مزمنة</div></div></div>
+    <div class="row" style="margin-top:12px"><button class="btn btn-sm btn-o" style="flex:1" data-go="medprofile">${ic('id', 18)} استعراض بياناتي</button><button class="btn btn-sm btn-p" style="flex:1" data-toast="فتح تعديل البيانات">${ic('edit', 18)} تعديل بياناتي</button></div></div>
+  <div class="card list" style="padding:4px 16px">${[
+    ['caregivers', 'users', 'g', 'شركاء الرعاية', '2 نشط · سارة وفهد'],
+    ['location', 'nav', 'p', 'موقعي الآن', 'تحديد موقعك على الخريطة ومشاركته'],
+    ['medprofile', 'clip', 'c', 'ملفي الطبي', '2 حالة مزمنة · حساسية واحدة'],
+    ['medicalid', 'id', 'p', 'بطاقة التعريف الطبية', 'الاسم والأمراض والأدوية ورقم الطوارئ'],
+    ['report', 'file', 'g', 'تقرير الطبيب', 'ملخص الالتزام والأعراض والقياسات لعرضه على طبيبك'],
+    ['health', 'watch', 'pk', 'صحتي وApple Watch', 'نبض 72 · أكسجين 97٪ · آخر مزامنة قبل 3 د'],
+    ['assess', 'clip', 'p', 'التقييمات الصحية', 'اختبار خطر ما قبل السكري بنقاط لكل إجابة'],
+    ['insights', 'brain', 'p', 'مساعد الرعاية الذكي', 'درس آخر 14 يوماً · لا أنماط تستدعي الانتباه'],
+    ['settings', 'gear', 'p', 'الإعدادات', 'التنبيهات والمظهر والخصوصية'],
+  ].map(([g, i, c, t, s]) => `<div class="li" data-go="${g}"><div class="icbox ${c}">${ic(i)}</div><div style="min-width:0;flex:1"><b>${t}</b><div class="sub">${s}</div></div><span class="chev">${ic('chevL', 18)}</span></div>`).join('')}</div>`) + nav();
 
-S.profile = () => view(`
-  ${appbar('ملفي', '<button class="ib" data-go="settings">⚙</button>')}
-  <div class="card row"><div class="avatar !w-[60px] !h-[60px] !text-2xl">ن</div><div class="flex-1"><b class="text-[17px]">${D.patient.fullName}</b><div class="sub">${ar(D.patient.age)} سنة · فصيلة الدم ${D.patient.bloodType}</div><div class="sub">${D.patient.conditions.join(' · ')}</div></div></div>
-  <div class="med !bg-success/15 !border-success/40" data-go="about"><span class="text-2xl">★</span><div class="flex-1"><b>التطبيق والخدمات</b><div class="sub">ما يقدمه جرعة لك ولمن يرعاك</div></div><span class="sub">›</span></div>
-  ${[['caregivers', '👨‍👩‍👧', 'شركاء الرعاية', 'خالد وريم يتابعان'], ['insights', '✨', 'المساعد الذكي', '٣ ملاحظات جديدة'], ['health', '⌚', 'صحتي والساعة الذكية', 'نبض ٧٢ · أكسجين ٩٧٪'], ['medicalid', '🪪', 'بطاقة التعريف الطبية', 'للمشاركة والطباعة مع QR'], ['safezone', '📍', 'النطاق الآمن وموقعي', 'نشط · ٥٠٠ م حول المنزل'], ['assess', '📋', 'التقييمات الصحية', 'خطر ما قبل السكري: منخفض']].map(([g, i, t, s]) => `<div class="med" data-go="${g}"><span class="text-2xl">${i}</span><div class="flex-1"><b>${t}</b><div class="sub">${s}</div></div><span class="sub">›</span></div>`).join('')}`) + nav();
+S.caregivers = () => view(`${appbar('شركاء الرعاية', { back: 'profile' })}
+  <div class="card">${head('users', 'g', 'الرعاية المشتركة', `${D.caregivers.length} من ${D.caregivers.length} شركاء نشطون، والبيانات تتزامن فورياً.`)}</div>
+  <div class="card">${head('users', 'soft-p', 'دعوة قريب', 'يمسح قريبك رمز QR من تطبيق جرعة على هاتفه، أو ترسل له رابط الدعوة. الرمز صالح لعشر دقائق ولمرة واحدة.')}
+    <div class="row" style="margin-top:12px"><button class="btn btn-g" style="flex:1" id="invite">${ic('qr', 18)} رمز الربط</button><button class="btn btn-o" style="flex:1" data-toast="إرسال رابط الدعوة بالبريد">${ic('users', 18)} إضافة شخص</button></div>
+    <div style="text-align:center;margin-top:10px;color:var(--appt);font-weight:700;font-size:14px">${ic('scan', 16, 'style="display:inline;vertical-align:middle"')} أو امسح رمز القريب من هاتفه</div></div>
+  <div class="card">${head('nav', 'soft-g', 'مشاركة موقعي', '')}<div class="set"><div class="icbox sm g">${ic('activity')}</div><div class="t">تعمل تلقائياً<small>يصل موقعك إلى كل شريك ربط حسابه برمزك، وفوراً عند الخروج من النطاق الآمن.</small></div>${sw(true)}</div></div>
+  <div class="card"><h3>الشركاء</h3><div class="list">${D.caregivers.map(c => `<div class="li" style="cursor:default"><div class="avatar ${c.online ? 'on' : ''}">${c.initials}</div><div style="flex:1"><b>${c.name} <span class="sub" style="display:inline">· ${c.relation}</span></b><div class="sub">${c.role}</div></div><span class="chip ${c.online ? 'chip-g' : 'chip-n'}">${c.online ? 'متصل' : 'غير متصل'}</span></div>`).join('')}</div></div>
+  <div class="card"><h3>ما تراه سارة الآن</h3><div class="sub" style="margin-bottom:6px">سجل الرعاية اللحظي</div>${D.careFeed.map(f => `<div class="feed"><i class="${f.kind}"></i><div style="flex:1;font-size:15px">${f.text}<div class="sub">${f.time}</div></div></div>`).join('')}</div>
+  <div class="card"><h3>صلاحيات التنبيهات</h3>${[['جرعة فائتة', true], ['خروج من النطاق الآمن', true], ['بطارية هاتف المريض منخفضة', true], ['تعديل الأدوية', false]].map(([t, on]) => `<div class="set"><div class="t">${t}</div>${sw(on)}</div>`).join('')}</div>`) + nav();
 
-S.caregivers = () => view(`
-  ${appbar('شركاء الرعاية', '<button class="ib" id="invite">＋</button>', back('profile'))}
-  <div class="card"><h3>الشركاء النشطون</h3>${D.caregivers.map(c => `<div class="row py-2"><div class="avatar ${c.online ? 'on' : ''}">${c.initials}</div><div class="flex-1"><b>${c.name}</b> <span class="sub">· ${c.relation}</span><div class="sub">${c.role}</div></div><span class="chip bg-field">${c.online ? 'متصل' : 'غير متصل'}</span></div>`).join('')}</div>
-  <div class="card"><h3>ما يراه خالد الآن</h3><div class="sub mb-1.5">سجل الرعاية اللحظي</div>${D.careFeed.map(f => `<div class="feed"><i class="${f.kind}"></i><div class="flex-1 text-[15px]">${f.text}<div class="sub">${f.time}</div></div></div>`).join('')}</div>
-  <div class="card"><h3>صلاحيات التنبيهات</h3>${[['جرعة فائتة', true], ['خروج من النطاق الآمن', true], ['بطارية هاتف المريض منخفضة', true], ['تعديل الأدوية', false]].map(([t, on]) => `<div class="set"><span>${t}</span>${tog(on)}</div>`).join('')}</div>`) + nav();
+S.location = () => view(`${appbar('موقعي الآن', { back: 'profile' })}
+  <div class="map"><div class="zone"></div><div class="home">${ic('home', 30)}</div><div class="me"></div><div class="lbl">داخل النطاق الآمن · 120 م من المنزل</div></div>
+  <div class="card"><div class="set"><div class="icbox sm g">${ic('shield')}</div><div class="t">النطاق الآمن نشط<small>نصف قطر 500 م حول المنزل. عند الخروج يصل تنبيه فوري لسارة وفهد مع الموقع ونسبة البطارية.</small></div>${sw(true)}</div></div>
+  <div class="row" style="margin-bottom:14px"><button class="btn btn-p" style="flex:1" data-toast="اتصال بسارة">${ic('users', 18)} اتصال سريع</button><button class="btn btn-n" style="flex:1" data-toast="مشاركة الموقع الحالي">${ic('share', 18)} مشاركة موقعي</button></div>`) + nav();
 
-S.insights = () => view(`
-  ${appbar('المساعد الذكي', '', back('profile'))}
-  <div class="card !border-0 text-white bg-gradient-to-br from-primary/90 to-appt/85"><div class="sub !text-white/75">يعمل على الجهاز · لا تغادر بياناتك هاتفك</div><h3 class="!text-white my-1">اكتشفنا ٣ أنماط هذا الأسبوع</h3><div class="text-[14.5px] opacity-90">اعتمدي الاقتراحات أو خصّصيها يدوياً.</div></div>
-  ${D.insights.map(x => `<div class="card"><div class="ins flex gap-3 items-start"><div class="text-[26px] flex-none">${x.icon}</div><div class="flex-1"><b>${x.title}</b><p>${x.body}</p><div class="flex gap-2"><button class="btn-g !h-[38px] !text-[14.5px] flex-1" data-toast="تم اعتماد: ${x.action}">✓ ${x.action}</button><button class="btn-n !h-[38px] !text-[14.5px]">تجاهل</button></div></div></div></div>`).join('')}
-  <div class="card"><h3>تكييف الواجهة</h3><div class="sub">لوحظ تكرار النقر الخاطئ على الأزرار الصغيرة. هل تودّين تكبير الأزرار؟</div><button class="btn-p btn-full mt-2.5 !h-11" id="suggestAlz">تفعيل وضع الرعاية</button></div>`) + nav();
+S.medprofile = () => view(`${appbar('ملفي الطبي', { back: 'profile', left: `<button class="ib" data-toast="فتح التعديل">${ic('edit')}</button>` })}
+  <div class="card"><h3>البيانات الأساسية</h3><div class="list">${[['الاسم', D.patient.fullName], ['العمر', `${D.patient.age} سنة`], ['فصيلة الدم', D.patient.bloodType], ['الوزن / الطول', `${D.patient.weight} كغ / ${D.patient.height} سم`]].map(([k, v]) => `<div class="li" style="cursor:default"><span class="sub" style="width:110px">${k}</span><b>${v}</b></div>`).join('')}</div></div>
+  <div class="card">${head('heart', 'soft-c', 'الأمراض المزمنة', '')}<div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap">${D.patient.conditions.map(c => `<span class="chip chip-c" style="padding:5px 12px;font-size:14px">${c}</span>`).join('')}</div></div>
+  <div class="card">${head('alertT', 'soft-y', 'الحساسية', '')}<div class="row" style="margin-top:10px;gap:8px">${D.patient.allergies.map(c => `<span class="chip chip-y" style="padding:5px 12px;font-size:14px">${c}</span>`).join('')}</div></div>
+  <div class="card">${head('hospital', 'soft-b', 'ملفات المستشفيات', 'مستشفى الملك فهد العام · رقم الملف 10716934')}</div>`) + nav();
 
-S.health = () => view(`
-  ${appbar('صحتي', '<button class="ib">↗</button>', back('profile'))}
-  <div class="sub mb-2.5">⌚ آخر مزامنة من Apple Watch قبل ٣ دقائق</div>
-  <div class="grid grid-cols-2 gap-2.5">${D.vitals.map(v => `<div class="card !m-0 !p-3.5"><small class="text-muted">${v.label}</small><div><b class="text-[26px] font-extrabold">${ar(v.value)}</b> <small class="text-muted">${v.unit}</small></div><small class="text-success">${v.trend}</small></div>`).join('')}</div>
-  <div class="card mt-3.5"><h3>تخطيط القلب · اليوم ٨:١٢ ص</h3><div class="h-12 mt-2 rounded-lg relative overflow-hidden bg-[repeating-linear-gradient(90deg,transparent_0_24px,rgba(45,138,107,.15)_24px_25px)]"><svg viewBox="0 0 340 48" preserveAspectRatio="none" class="absolute inset-0 w-full h-full"><path d="M0 24 L40 24 L48 22 L56 24 L64 24 L70 8 L76 42 L82 24 L120 24 L128 22 L136 24 L144 24 L150 8 L156 42 L162 24 L200 24 L208 22 L216 24 L224 24 L230 8 L236 42 L242 24 L280 24 L288 22 L296 24 L304 24 L310 8 L316 42 L322 24 L340 24" fill="none" stroke="#2D8A6B" stroke-width="2"/></svg></div><div class="sub mt-2">نظم جيبي طبيعي · ٧٢ نبضة</div></div>
-  <div class="card"><h3>قياسات يدوية</h3><div class="row"><div class="stat"><b>١٢٨/٨٢</b><small>الضغط · أمس</small></div><div class="stat"><b>٦.٤</b><small>السكر · صائم</small></div><div class="stat"><b>٧٤</b><small>الوزن كغ</small></div></div><button class="btn-n btn-full mt-3 !h-11">＋ إضافة قياس</button></div>
-  <div class="card"><div class="row sb"><div><b>مشاركة مع شركاء الرعاية</b><div class="sub">خالد يرى النبض والنوم فقط</div></div>${tog(true)}</div></div>`) + nav();
-
-S.alerts = () => view(`
-  ${appbar('التنبيهات', '', back('home'))}
-  ${[['⏰', 'حان وقت أتورفاستاتين ٢٠ ملغ', 'الآن', 'bg-warning'], ['🏥', 'تذكير: مراجعة عيادة السكري بعد ٤ أيام', 'قبل ساعتين', 'bg-appt'], ['👨‍👩‍👧', 'خالد قبِل دعوة شريك الرعاية', 'أمس', 'bg-success'], ['📦', 'مخزون أتورفاستاتين يكفي ٦ أيام', 'أمس', 'bg-warning'], ['💧', 'لم تسجّلي شرب الماء منذ ٣ ساعات', 'أمس', 'bg-appt']].map(([i, t, w, k]) => `<div class="med"><span class="text-[22px]">${i}</span><div class="flex-1"><b class="text-[16px]">${t}</b><div class="sub">${w}</div></div><i class="w-2.5 h-2.5 rounded-full block ${k}"></i></div>`).join('')}`) + nav();
-
-S.settings = () => view(`
-  ${appbar('الإعدادات', '', back('profile'))}
-  <div class="card"><h3>المظهر</h3>
-    <div class="set"><div>الوضع الداكن<small>الافتراضي للمرضى عموماً</small></div><div class="sw ${document.body.dataset.theme === 'dark' ? 'on' : ''}" id="setDark"></div></div>
-    <div class="set"><div>وضع الرعاية<small>واجهة فاتحة مكبّرة ومبسّطة لمن يحتاج متابعة</small></div><div class="sw ${state.alz ? 'on' : ''}" id="setAlz"></div></div></div>
-  <div class="card"><h3>التنبيهات</h3>
-    <div class="set"><div>نغمة التنبيه<small>هادئة ١</small></div><span class="sub">›</span></div>
-    <div class="set"><div>تنبيه منطوق بالعربية<small>يقرأ اسم الدواء والجرعة</small></div>${tog(true)}</div>
-    <div class="set"><div>تذكيرات شرب الماء<small>٨ أكواب موزّعة على اليوم</small></div>${tog(true)}</div></div>
-  <div class="card"><h3>الخصوصية والأمان</h3>
-    <div class="set"><div>قفل التطبيق بـ Face ID</div>${tog(true)}</div>
-    <div class="set"><div>النسخ الاحتياطي السحابي<small>آخر نسخة: اليوم ٦:٠٠ ص</small></div>${tog(true)}</div>
-    <div class="set"><div>تصدير البيانات الصحية</div><span class="sub">›</span></div></div>
-  <button class="btn-n btn-full !h-11 mb-3" data-go="about">★ التطبيق والخدمات</button>
-  <p class="text-center sub">جرعة · الإصدار ١.٠ · نموذج أولي للعرض</p>`) + nav();
-
-S.medicalid = () => view(`
-  ${appbar('بطاقة التعريف الطبية', '<button class="ib" data-toast="مشاركة البطاقة كصورة أو PDF">↗</button>', back('profile'))}
-  <div class="card !border-2 !border-alert"><div class="row sb"><b class="text-alert">🆘 بطاقة طوارئ</b><span class="sub">جرعة</span></div><div class="hr"></div>
-    <b class="text-lg">${D.patient.fullName}</b><div class="sub">${ar(D.patient.age)} سنة · ${D.patient.bloodType}</div>
+S.medicalid = () => view(`${appbar('بطاقة التعريف الطبية', { back: 'profile', left: `<button class="ib" data-toast="مشاركة البطاقة كصورة أو PDF">${ic('share')}</button>` })}
+  <div class="card" style="border:2px solid var(--coral)"><div class="row sb"><b style="color:var(--coral)" class="row">${ic('id', 20)} بطاقة طوارئ</b><span class="sub">جرعة</span></div><div class="hr"></div>
+    <b style="font-size:19px">${D.patient.fullName}</b><div class="sub">${D.patient.age} سنة · فصيلة الدم ${D.patient.bloodType}</div>
     <div class="hr"></div><div class="sub">الأمراض</div><b>${D.patient.conditions.join('، ')}</b>
-    <div class="sub mt-2">الأدوية</div><b>${state.meds.map(m => m.name).join('، ')}</b>
-    <div class="sub mt-2">اتصال طوارئ</div><b>${D.patient.emergency.name} · ${D.patient.emergency.phone}</b>
-    <div class="qr w-[150px] h-[150px] my-2.5 mx-auto rounded-[14px] opacity-85 border-8 border-bg outline outline-1 outline-sep"></div><div class="text-center sub">امسح الرمز لعرض البطاقة</div></div>`) + nav();
+    <div class="sub" style="margin-top:8px">الحساسية</div><b>${D.patient.allergies.join('، ')}</b>
+    <div class="sub" style="margin-top:8px">الأدوية</div><b>${state.meds.map(m => m.name).join('، ')}</b>
+    <div class="sub" style="margin-top:8px">اتصال طوارئ</div><b>${D.patient.emergency.name} · <span dir="ltr">${D.patient.emergency.phone}</span></b>
+    <div class="qr"></div><div class="sub" style="text-align:center">امسح الرمز لعرض البطاقة</div></div>`) + nav();
 
-S.safezone = () => view(`
-  ${appbar('النطاق الآمن', '', back('profile'))}
-  <div class="card !p-0 overflow-hidden h-[260px] relative !bg-[#DCE7E2]">
-    <div class="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent_0_38px,rgba(0,0,0,.05)_38px_40px),repeating-linear-gradient(90deg,transparent_0_38px,rgba(0,0,0,.05)_38px_40px)]"></div>
-    <div class="absolute left-1/2 top-1/2 w-[190px] h-[190px] rounded-full bg-success/20 border-2 border-dashed border-success -translate-x-1/2 -translate-y-1/2"></div>
-    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl">🏠</div>
-    <div class="absolute left-[58%] top-[40%] w-4 h-4 rounded-full bg-appt border-[3px] border-white shadow-[0_0_0_6px_rgba(59,110,158,.3)]"></div>
-    <div class="absolute bottom-2.5 right-2.5 bg-card rounded-[10px] px-2.5 py-1.5 text-xs text-ink">📍 داخل النطاق · ١٢٠ م من المنزل</div></div>
-  <div class="card"><div class="row sb"><div><b>النطاق الآمن نشط</b><div class="sub">نصف قطر ٥٠٠ م حول المنزل</div></div>${tog(true)}</div><div class="hr"></div>
-    <div class="sub">عند الخروج من النطاق يصل تنبيه فوري لخالد وريم مع الموقع ونسبة البطارية، وتظهر لهما أزرار الاتصال والملاحة وجرس الإنذار عن بُعد.</div></div>
-  <div class="flex gap-2.5"><button class="btn-p flex-1" data-toast="اتصال بخالد">📞 اتصال سريع</button><button class="btn-n flex-1" data-toast="مشاركة الموقع الحالي">↗ مشاركة موقعي</button></div>`) + nav();
+S.report = () => view(`${appbar('تقرير الطبيب', { back: 'profile' })}
+  <div class="row" style="margin-bottom:14px"><span class="sub">الفترة</span><div class="seg" style="flex:1">${['أسبوعان', 'شهر', '3 أشهر'].map(p => `<button class="${state.period === p ? 'on' : ''}" data-period="${p}">${p}</button>`).join('')}</div></div>
+  <div class="card">${head('file', 'p', 'تقرير حالة المريض', 'آخر 30 يوماً · أُنشئ 29 أكتوبر 2026')}</div>
+  <div class="card">${head('user', 'soft-p', 'المريض', '')}<div class="list" style="margin-top:6px">${[['الاسم', D.patient.fullName], ['العمر', `${D.patient.age} سنة`], ['فصيلة الدم', D.patient.bloodType], ['الأمراض المزمنة', D.patient.conditions.join('، ')], ['شريك الرعاية', 'سارة السالم']].map(([k, v]) => `<div class="li" style="cursor:default;padding:9px 0"><span class="sub" style="width:120px">${k}</span><b>${v}</b></div>`).join('')}</div></div>
+  <div class="card">${head('pill', 'soft-g', 'الالتزام بالدواء', '')}<div class="row sb" style="margin-top:8px"><span class="sub">من 4 جرعة مستحقة</span><b style="font-size:34px;color:var(--gold)">75٪</b></div>
+    <div class="row" style="gap:8px;margin-top:8px"><div class="stat" style="background:rgba(45,138,107,.12)"><b style="color:var(--green)">3</b><small>أُخذت</small></div><div class="stat"><b>1</b><small>تُخطيت</small></div><div class="stat" style="background:rgba(217,83,79,.12)"><b style="color:var(--coral)">0</b><small>فائتة</small></div><div class="stat" style="background:rgba(217,155,38,.14)"><b style="color:var(--gold)">0</b><small>سلسلة أيام</small></div></div>
+    <div class="sub" style="margin-top:10px">أسبوعاً بأسبوع</div><div class="bars">${[0, 0, 0, 75].map(v => `<i class="lo" style="height:${Math.max(4, v)}%;opacity:${v ? .9 : .2}"></i>`).join('')}</div></div>
+  <div class="card">${head('activity', 'soft-b', 'الأعراض والقياسات', 'ضغط 128/82 · سكر صائم 6.4 · لا أعراض مسجّلة بعد الجرعات.')}</div>
+  <button class="btn btn-full btn-p" data-toast="جارٍ إنشاء ملف PDF للطبيب">${ic('file', 18)} إنشاء ملف PDF للطبيب</button>`) + nav();
 
-S.assess = () => view(`
-  ${appbar('التقييمات الصحية', '', back('profile'))}
-  <div class="card"><div class="row sb"><h3 class="!mb-0">خطر ما قبل السكري</h3><span class="chip bg-success/15 text-success">منخفض · ٤ نقاط</span></div><div class="sub mt-1.5">نموذج وزارة الصحة · أُجري في ١٠ أكتوبر</div><button class="btn-n btn-full mt-3 !h-11">إعادة التقييم</button></div>
-  <div class="card"><h3>تقييمات متاحة</h3>${['ضغط الدم ومخاطر القلب', 'جودة النوم', 'الحالة المزاجية (PHQ-2)', 'خطر السقوط لكبار السن'].map(t => `<div class="set"><span>${t}</span><span class="sub">ابدأ ›</span></div>`).join('')}</div>`) + nav();
+S.health = () => view(`${appbar('صحتي وApple Watch', { back: 'profile', left: `<button class="ib" data-toast="مزامنة الآن">${ic('refresh')}</button>` })}
+  <div class="sub" style="margin-bottom:10px" class="row">آخر مزامنة من Apple Watch قبل 3 دقائق</div>
+  <div class="grid2" style="margin-bottom:14px">${D.vitals.map(v => `<div class="card" style="margin:0;padding:14px"><small class="sub">${v.label}</small><div><b style="font-size:26px;font-weight:800">${v.value}</b> <small class="sub">${v.unit}</small></div><small style="color:var(--green)">${v.trend}</small></div>`).join('')}</div>
+  <div class="card"><h3>تخطيط القلب · اليوم 8:12 ص</h3><div class="ecg"><svg viewBox="0 0 340 56" preserveAspectRatio="none"><path d="M0 28 L40 28 L48 26 L56 28 L64 28 L70 8 L76 48 L82 28 L120 28 L128 26 L136 28 L144 28 L150 8 L156 48 L162 28 L200 28 L208 26 L216 28 L224 28 L230 8 L236 48 L242 28 L280 28 L288 26 L296 28 L304 28 L310 8 L316 48 L322 28 L340 28" fill="none" stroke="#2D8A6B" stroke-width="2"/></svg></div><div class="sub" style="margin-top:8px">نظم جيبي طبيعي · 72 نبضة</div></div>
+  <div class="card"><h3>قياسات يدوية</h3><div class="row" style="gap:8px"><div class="stat"><b>128/82</b><small>الضغط · أمس</small></div><div class="stat"><b>6.4</b><small>السكر · صائم</small></div><div class="stat"><b>78</b><small>الوزن كغ</small></div></div><button class="btn btn-full btn-n" style="margin-top:12px;height:46px" data-toast="إضافة قياس جديد">${ic('plus', 18)} إضافة قياس</button></div>
+  <div class="card"><div class="set"><div class="t">مشاركة مع شركاء الرعاية<small>سارة ترى النبض والنوم فقط</small></div>${sw(true)}</div></div>`) + nav();
 
-S.about = () => view(`
-  ${appbar('التطبيق والخدمات', '', back(state.tab === 'profile' ? 'profile' : 'home'))}
-  <div class="card !border-0 text-white bg-gradient-to-br from-primary to-success/90 text-center">
-    <img src="../assets/icon.png" class="w-16 h-16 rounded-[18px] mx-auto mb-2.5 shadow-lg">
-    <h3 class="!text-xl !mb-1 shine">جرعة · Jor'ah</h3>
-    <div class="text-[15px] opacity-90 leading-[1.9]">تطبيق عربي للتذكير بالأدوية والمواعيد الطبية، يربط كل من يحتاج متابعة بمن يرعاه. متوفر على iOS وأندرويد وApple Watch بحساب واحد.</div>
-    <div class="flex gap-2.5 mt-3.5"><button class="btn flex-1 !h-11 bg-white text-primary pulse" data-go="onboarding">▶ ابدأ الجولة</button><button class="btn flex-1 !h-11 bg-white/15 text-white border border-white/30" data-go="home">الشاشة الرئيسية</button></div>
-  </div>
+S.assess = () => view(`${appbar('التقييمات الصحية', { back: 'profile' })}
+  <div class="card"><div class="row sb"><h3>خطر ما قبل السكري</h3><span class="chip chip-g">منخفض · 4 نقاط</span></div><div class="sub">نموذج وزارة الصحة · أُجري في 10 أكتوبر</div><button class="btn btn-full btn-n" style="margin-top:12px;height:46px" data-toast="بدء التقييم من جديد">إعادة التقييم</button></div>
+  <div class="card"><h3>تقييمات متاحة</h3><div class="list">${[['heart', 'ضغط الدم ومخاطر القلب'], ['moon', 'جودة النوم'], ['smile', 'الحالة المزاجية (PHQ-2)'], ['walk', 'خطر السقوط لكبار السن']].map(([i, t]) => `<div class="li" data-toast="بدء: ${t}"><div class="icbox sm soft-p">${ic(i)}</div><b style="flex:1;font-weight:600">${t}</b><span class="chev">${ic('chevL', 18)}</span></div>`).join('')}</div></div>`) + nav();
 
-  <div class="card !border-2 !border-success relative mt-2">
-    <span class="chip bg-success text-white absolute -top-2.5 right-4">الميزة الأساسية</span>
-    <div class="flex gap-3 items-start mt-1"><div class="text-3xl flex-none">🫶</div><div><h3 class="!mb-1">وضع الرعاية لكل من يحتاج متابعة</h3><div class="sub leading-[1.85]">كبار السن، الأطفال، مرضى الزهايمر، وكل مريض يحتاج أحداً يطمئن عليه. واجهة مبسّطة مكبّرة للمريض، ومتابعة لحظية للجرعات والموقع والحالة لمن يرعاه.</div></div></div>
-    <button class="btn-g !h-10 !text-[14.5px] w-full mt-3" id="aboutAlz">جرّب وضع الرعاية الآن</button>
-  </div>
+S.insights = () => view(`${appbar('مساعد الرعاية الذكي', { back: 'profile' })}
+  <div class="card">${head('brain', 'p', 'درستُ آخر 14 يوماً', 'حلّلت 4 جرعة ولا توجد أنماط تستدعي الانتباه الآن.')}</div>
+  <div class="card" style="padding:12px"><div class="grid2"><div class="stat" style="background:rgba(45,138,107,.12)"><b style="color:var(--green)">—</b><small>هذا الأسبوع</small></div><div class="stat" style="background:rgba(59,110,158,.12)"><b style="color:var(--appt)">75٪</b><small>الأسبوع الماضي</small></div></div></div>
+  <div class="card">${head('activity', 'soft-y', 'الأنماط المكتشفة', '')}<div style="text-align:center;padding:14px 0 4px"><div class="icbox soft-g" style="margin:0 auto 8px">${ic('shield')}</div><b>لا أنماط تستدعي الانتباه</b><div class="sub">سأواصل المتابعة وأنبّهك عند ظهور تأخر متكرر أو خروج غير معتاد.</div></div></div>
+  <div class="card">${head('file', 'soft-g', 'نصائح اليوم لمقدم الرعاية', '')}<div style="margin-top:10px">${D.tips.map((t, i) => `<div class="tip"><div class="icbox sm soft-g">${ic(['sunset', 'sun', 'drop'][i])}</div><div><div class="row" style="gap:6px"><b>${t.title}</b><span class="chip chip-g">${t.tag}</span></div><div class="sub">${t.body}</div></div></div>`).join('')}</div></div>
+  <div class="card">${head('brain', 'soft-p', 'تكييف الواجهة', 'لوحظ تكرار النقر الخاطئ على الأزرار الصغيرة. هل تودّ تكبير الأزرار؟')}<button class="btn btn-full btn-p" style="margin-top:12px;height:46px" id="suggestSimple">تفعيل الوضع المبسّط</button></div>`) + nav();
 
-  <h3 class="text-[18px] font-bold mt-4 mb-2">الخدمات</h3>
-  ${[
-    ['⏰','تذكير ذكي بالعربية','تنبيه منطوق، تأجيل بلمسة، صوت القريب بدل الرنة، وخصم تلقائي من المخزون.','home'],
-    ['✉️','قراءة رسائل موعدي ووصفتي','الرسالة الرسمية تصير موعداً في التقويم أو دواءً في الجدول، على الجهاز.','appt:a1'],
-    ['👨‍👩‍👧','شركاء الرعاية','دعوة الأقارب برمز QR، صلاحيات محددة، سجل لحظي وتنبيه عند التأخر.','caregivers'],
-    ['📍','النطاق الآمن','طوق أخضر حول المنزل وطوق أحمر للطوارئ. الخروج برفقة قريب لا يُطلق إنذاراً.','safezone'],
-    ['💊','الأدوية والمخزون','كتالوج الأدوية والتفاعلات، التعرف على الاسم التجاري، وتذكير إعادة الصرف.','meds'],
-    ['▦','التقويم والالتزام','نقاط ملونة لكل يوم، نسب الالتزام الشهرية، وكشف تضارب المواعيد.','calendar'],
-    ['⌚','الصحة والساعة الذكية','النبض والأكسجين وتخطيط القلب والنوم من Apple Watch وHealth Connect.','health'],
-    ['✨','المساعد الذكي','يكتشف أنماط التأخر ونقص المخزون ويقترح تعديلات بموافقتك.','insights'],
-    ['🪪','بطاقة التعريف الطبية','الاسم وفصيلة الدم والأمراض والأدوية ورقم الطوارئ مع رمز QR.','medicalid'],
-    ['📋','التقييمات الصحية','اختبار خطر ما قبل السكري وتقييمات أخرى من وزارة الصحة.','assess'],
-  ].map(([i,t,d,g]) => `<div class="med" data-go="${g}"><span class="text-2xl flex-none">${i}</span><div class="flex-1"><b class="text-[16px]">${t}</b><div class="sub leading-[1.8] mt-0.5">${d}</div></div><span class="sub">›</span></div>`).join('')}
+S.settings = () => view(`${appbar('الإعدادات', { back: 'profile' })}
+  <div class="card"><div class="row"><div class="avatar">${ic('user', 26)}</div><div><b style="font-size:18px">${D.patient.fullName}</b><div class="sub" dir="ltr" style="text-align:right">${D.patient.email}</div><div class="sub row" style="gap:4px;font-size:13px;color:var(--green)">${ic('cloud', 14)} متصل بالسحاب · المزامنة ومشاركة الرعاية مفعّلة</div></div></div></div>
+  <div class="card">${head('bell', 'soft-y', 'التنبيهات والأدوية', '')}
+    ${[['pill', 'إشعارات الأدوية', '', true], ['steth', 'إشعارات المواعيد', '', true], ['box', 'التذكير بإعادة التعبئة', '', true], ['alertT', 'تنبيهات حساسة للوقت', 'تظهر فوراً وتتخطى ملخص الإشعارات', true], ['brain', 'إشعارات مساعد الرعاية', 'عند اكتشاف خلل أو تعديل الجدول، وملخص يومي صباحاً', true], ['megaphone', 'مناسبات التوعية الصحية', 'ثيم وإعلان في شهر سرطان الثدي واليوم العالمي للسكري وغيرها', true]].map(([i, t, s, on]) => `<div class="set">${ic(i)}<div class="t">${t}${s ? `<small>${s}</small>` : ''}</div>${sw(on)}</div>`).join('')}
+    <div class="set">${ic('bell')}<div class="t">صوت التنبيهات</div><span class="row" style="color:var(--gold);font-weight:700;gap:4px">جرس خفيف ${ic('chevL', 16)}</span></div></div>
+  <div class="card">${head('drop', 'soft-b', 'تذكير شرب الماء', '')}<div class="set">${ic('drop')}<div class="t">تذكيرات شرب الماء<small>مع رسائل توعية صحية في كل تذكير</small></div>${sw(true)}</div><div class="set">${ic('refresh')}<div class="t">كل</div><div class="seg" style="flex:none"><button class="on">ساعتين</button><button>3 ساعات</button><button>4 ساعات</button></div></div></div>
+  <div class="card">${head('sun', 'soft-p', 'المظهر', '')}<div class="set">${ic('moon')}<div class="t">الوضع الداكن</div><div class="sw ${document.body.dataset.theme === 'dark' ? 'on' : ''}" id="setDark"></div></div><div class="set">${ic('brain')}<div class="t">الوضع المبسّط<small>واجهة فاتحة مكبّرة ومبسّطة لكبار السن والزهايمر</small></div><div class="sw ${state.simple ? 'on' : ''}" id="setSimple"></div></div></div>
+  <div class="card">${head('lock', 'soft-g', 'الخصوصية والأمان', '')}<div class="set">${ic('lock')}<div class="t">قفل التطبيق بـ Face ID</div>${sw(true)}</div><div class="set">${ic('cloud')}<div class="t">النسخ الاحتياطي السحابي<small>آخر نسخة: اليوم 6:00 ص</small></div>${sw(true)}</div><div class="set">${ic('share')}<div class="t">تصدير البيانات الصحية</div><span class="chev">${ic('chevL', 18)}</span></div></div>
+  <p class="sub" style="text-align:center">جرعة · الإصدار 1.0 · نموذج أولي للعرض</p>`) + nav();
 
-  <h3 class="text-[18px] font-bold mt-4 mb-2">الوكلاء العاملون في التطبيق</h3>
-  <div class="card"><div class="sub mb-2">تسعة وكلاء على الجهاز، لكل واحد دور وقواعد. لا يشخّص أيٌّ منهم ولا يغيّر جرعة دون موافقة.</div>
-  ${[
-    ['🫶','وكيل الرعاية','يسمع كلام المريض ويجيبه بصوت دافئ ويبلغ العائلة بملخص.'],
-    ['👨‍👩‍👧','منسق العائلة','ينبّه الأقرب أولاً، يوزّع المرافقة، ويرسل النشرة المسائية.'],
-    ['⏰','مجدول التذكيرات','تدرج ثلاثي للجرعة وتذكير المواعيد وكشف الوصول للمستشفى.'],
-    ['📍','مراقب النطاق الآمن','يميّز الخروج برفقة قريب عن الخروج وحده.'],
-    ['🗓','محرك الجدولة','يربط الجرعة بالوجبة ويكشف التكرار والتعارض.'],
-    ['🔎','التعرف على الدواء','من الاسم التجاري إلى المادة الفعالة والفئة.'],
-    ['✨','مساعد الأنماط','يرصد التأخر المتكرر ويقترح إزاحة الجرعة.'],
-    ['📄','تقرير الطبيب','صفحة واحدة بالالتزام والأعراض والقياسات، PDF قبل الموعد.'],
-    ['💧','مذكّر الماء','تذكيرات موزّعة على اليقظة، لا تزيد على سبعة.'],
-  ].map(([i,t,d]) => `<div class="feed !border-sep"><span class="text-lg flex-none w-6 text-center">${i}</span><div class="flex-1 text-[14.5px]"><b>${t}</b><div class="sub">${d}</div></div></div>`).join('')}</div>
+/* ============ النوافذ المركزية ============ */
+const mhead = (title, { help = false, step = null } = {}) => `<div class="mhead"><button class="ib ghost" id="mClose">${ic('x')}</button><h3>${title}</h3>${help ? `<button class="ib ghost" data-toast="مساعدة الخطوة">${ic('help')}</button>` : '<span class="spacer"></span>'}</div>${step ? `<div class="steps">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= step ? 'on' : ''}"></i>`).join('')}</div>` : ''}`;
 
-  <div class="sub text-center mt-2">نموذج أولي للعرض · البيانات وهمية</div>`) + nav();
+function openAddChoice() {
+  modal(`<div style="text-align:center"><h3 style="font-size:20px;font-weight:800">ماذا تريد أن تضيف؟</h3><div class="sub">اختر نوع التذكير الجديد</div></div>
+    <div class="row" style="margin:16px 0;gap:12px"><button class="opt on" id="optMed"><div class="icbox g" style="width:54px;height:54px">${ic('pill', 26)}</div>دواء / جرعة</button><button class="opt" id="optAppt"><div class="icbox b" style="width:54px;height:54px">${ic('steth', 26)}</div>موعد عيادة / طبيب</button></div>
+    <div class="hr"></div><button class="row" style="width:100%;justify-content:center;gap:10px;padding:8px 0;font-weight:700" id="optSimple"><div class="icbox sm g">${ic('brain')}</div>تفعيل الوضع المبسّط</button>
+    <button style="display:block;margin:6px auto 0;font-weight:700;color:var(--primary)" id="mClose2">إلغاء</button>`);
+}
 
-/* ---------- الملاحة والعرض ---------- */
+const FORMS = [['pill', 'قرص'], ['pill', 'كبسولة'], ['flask', 'شراب'], ['activity', 'حقنة'], ['drop', 'قطرة'], ['refresh', 'بخاخ']];
+const FREQ = ['مرة يومياً', 'مرتين يومياً', '3 مرات يومياً', '4 مرات يومياً'];
+const MEAL = ['مع الأكل', 'قبل الأكل', 'بعد الأكل', 'لا يهم'];
+function wizTimes(w) { const n = FREQ.indexOf(w.freq) + 1; const gap = Math.floor(24 / n); return Array.from({ length: n }, (_, i) => addMin(w.time, i * gap * 60)); }
+function openWizard(step = 1) {
+  if (!state.wiz) state.wiz = { step: 1, name: '', conc: '', form: 'قرص', freq: 'مرة يومياً', meal: 'مع الأكل', time: '08:00', start: 'اليوم' };
+  const w = state.wiz; w.step = step;
+  const next = (label = 'التالي', id = 'wNext', cls = 'btn-p') => `<button class="btn btn-full ${cls}" id="${id}" style="margin-top:4px">${label} ${ic('chevL', 18)}</button>`;
+  const backBtn = `<button class="btn btn-full btn-n" id="wBack" style="margin-top:10px;height:44px">${ic('chevR', 18)} السابق</button>`;
+  let body = '';
+  if (step === 1) body = `<div class="sub" style="font-weight:700">١ · هوية الدواء</div>
+    <div class="qbox"><h4><span class="icbox sm soft-g">${ic('pill')}</span>ما اسم الدواء؟</h4><div class="sub" style="margin-bottom:10px">اكتب الاسم التجاري كما على العبوة، أو صوّر العبوة، أو أمله بصوتك. سنتعرف على المادة الفعالة والفئة تلقائياً.</div>
+      <div class="row"><div class="field" style="flex:1;margin:0"><span class="sub">أ</span><input id="wName" placeholder="مثال: أوجمنتين ٦٢٥" value="${w.name}"></div><button class="icbox g" data-toast="الإملاء الصوتي: قل اسم الدواء">${ic('mic')}</button></div>
+      <div class="row" style="margin:10px 0"><button class="btn btn-sm btn-pill" style="flex:1;background:rgba(45,138,107,.12);color:var(--green)" data-toast="فتح الكاميرا لتصوير العبوة">${ic('camera', 16)} تصوير العبوة</button><button class="btn btn-sm btn-pill" style="flex:1;background:rgba(45,138,107,.12);color:var(--green)" data-toast="اختيار صورة من الصور">${ic('image', 16)} من الصور</button></div>
+      <div class="field" style="margin:0">${ic('scale', 18)}<input id="wConc" placeholder="التركيز (مثال: ٥٠٠ ملغ) — اختياري" value="${w.conc}"></div></div>${next()}`;
+  if (step === 2) body = `<div class="sub" style="font-weight:700">٢ · الشكل الصيدلاني</div>
+    <div class="qbox"><h4><span class="icbox sm soft-g">${ic('box')}</span>ما شكل ${w.name || 'الدواء'}؟</h4><div class="sub" style="margin-bottom:10px">يحدد الشكل طريقة حساب المخزون وتعليمات التناول.</div>
+      <div class="grid3">${FORMS.map(([i, f]) => `<button class="tile ${w.form === f ? 'on' : ''}" data-form="${f}">${ic(i)}${f}</button>`).join('')}</div></div>${next()}${backBtn}`;
+  if (step === 3) body = `<div class="sub" style="font-weight:700">٣ · عدد المرات</div>
+    <div class="qbox"><h4><span class="icbox sm soft-g">${ic('refresh')}</span>كم مرة في اليوم؟</h4><div class="grid2">${FREQ.map(f => `<button class="tile ${w.freq === f ? 'on' : ''}" data-freq="${f}">${f}</button>`).join('')}</div>
+      <div class="sub" style="margin:12px 0 6px;font-weight:700">علاقته بالوجبة</div><div class="grid2">${MEAL.map(m => `<button class="tile ${w.meal === m ? 'on' : ''}" data-meal="${m}">${m}</button>`).join('')}</div></div>${next()}${backBtn}`;
+  if (step === 4) body = `<div class="sub" style="font-weight:700">٤ · أول جرعة</div>
+    <div class="qbox"><h4><span class="icbox sm soft-g">${ic('clock')}</span>متى الجرعة الأولى؟</h4><div class="sub" style="margin-bottom:10px">سنوزّع بقية الجرعات على اليوم تلقائياً ونربط كل واحدة بوجبة أو بالنوم.</div>
+      <div class="field">${ic('clock', 18)}<input id="wTime" type="time" value="${w.time}" style="direction:ltr"></div>
+      <div class="sub" style="font-weight:700;margin-bottom:6px">يبدأ من</div><div class="grid2">${['اليوم', 'غداً'].map(s => `<button class="tile ${w.start === s ? 'on' : ''}" data-start="${s}">${s}</button>`).join('')}</div></div>${next()}${backBtn}`;
+  if (step === 5) { const times = wizTimes(w); body = `<div class="sub" style="font-weight:700">٥ · الجدول والتقييم</div>
+    <div class="qbox"><h4><span class="icbox sm soft-g">${ic('calendar')}</span>${w.name || 'دواء جديد'} ${w.conc}</h4><div class="sub" style="margin-bottom:10px">${w.form} · ${w.freq} · ${w.meal} · يبدأ ${w.start}</div>
+      ${times.map((t, i) => `<div class="time-row"><span class="row" style="gap:8px">${ic('clock', 18)} الجرعة ${i + 1}</span><b>${t12(t)}</b><span class="chip chip-n">${+t.slice(0, 2) < 11 ? 'مع الإفطار' : +t.slice(0, 2) < 17 ? 'مع الغداء' : +t.slice(0, 2) < 22 ? 'مع العشاء' : 'قبل النوم'}</span></div>`).join('')}
+      <div class="row" style="margin-top:10px;gap:8px;padding:10px;border-radius:12px;background:rgba(45,138,107,.12);color:var(--green);font-size:14px;font-weight:700">${ic('shield', 18)} فحص التفاعلات: لا تعارض مع أدويتك الحالية، والمادة الفعالة غير مكررة.</div></div>
+    ${next('حفظ وجدولة التنبيهات', 'wSave', 'btn-g')}${backBtn}`; }
+  modal(`${mhead('جدولة دواء', { help: true, step })}${body}`);
+}
+
+function openAddAppt() {
+  modal(`${mhead('إضافة موعد')}
+    <div class="qbox" style="background:rgba(45,138,107,.1)"><h4><span class="icbox sm g">${ic('sparkle')}</span>وُجدت رسالة من «موعدي»</h4><div class="sub" style="margin-bottom:10px">مستشفى الملك فهد العام · عيادة العيون · الثلاثاء 3 نوفمبر 9:15 ص</div><button class="btn btn-full btn-g" style="height:44px" data-toast="أُضيف الموعد مع تنبيه قبل يوم وقبل ساعتين" data-close>استيراد هذا الموعد</button></div>
+    <div class="field">${ic('hospital', 18)}<input placeholder="العيادة أو المستشفى"></div>
+    <div class="field">${ic('user', 18)}<input placeholder="اسم الطبيب"></div>
+    <div class="row"><div class="field" style="flex:1">${ic('calendar', 18)}<input type="date" style="direction:ltr"></div><div class="field" style="flex:1">${ic('clock', 18)}<input type="time" style="direction:ltr"></div></div>
+    <div class="field">${ic('bell', 18)}<span style="color:var(--ink);flex:1">تنبيه قبل يوم وقبل ساعتين</span>${ic('chevL', 18)}</div>
+    <button class="btn btn-full btn-p" data-toast="تم حفظ الموعد" data-close>حفظ الموعد</button>`);
+}
+
+function openInvite() {
+  modal(`${mhead('دعوة شريك رعاية')}<p class="sub" style="text-align:center">يمسح قريبك هذا الرمز من تطبيق جرعة، ثم تحدّد صلاحياته قبل الربط.</p><div class="qr"></div><div style="text-align:center"><b style="letter-spacing:4px;font-size:22px" dir="ltr">JRH-4K2P</b><div class="sub">ينتهي خلال 10 دقائق · لمرة واحدة</div></div>
+    <div class="row" style="margin-top:14px"><button class="btn btn-p" style="flex:1" data-toast="تم نسخ رابط الدعوة" data-close>نسخ الرابط</button><button class="btn btn-n" style="flex:1" data-toast="مشاركة عبر واتساب" data-close>واتساب</button></div>`);
+}
+
+function openImport() {
+  modal(`${mhead('استيراد من وصفة')}<div class="field" style="height:auto;padding:12px 14px;align-items:flex-start">${ic('paste', 18)}<span style="flex:1;font-size:14px;line-height:1.7;color:var(--ink)">وصفتي: صُرفت لك الأدوية التالية: Metformin 500mg قرص مرتين يومياً مع الأكل، Atorvastatin 20mg قرص مرة يومياً مساءً…</span></div>
+    <div class="sub" style="font-weight:700;margin-bottom:6px">الأدوية المكتشفة</div>
+    ${[['ميتفورمين 500 ملغ', 'مرتين يومياً · مع الأكل', 'موجود مسبقاً'], ['أتورفاستاتين 20 ملغ', 'مرة يومياً · مساءً', 'موجود مسبقاً']].map(([n, s, st]) => `<div class="time-row"><div><b>${n}</b><div class="sub">${s}</div></div><span class="chip chip-n">${st}</span></div>`).join('')}
+    <div class="row" style="margin-top:8px;gap:8px;padding:10px;border-radius:12px;background:rgba(217,155,38,.14);color:var(--gold);font-size:14px;font-weight:700">${ic('alertT', 18)} لم يُضف دواء جديد: الدواءان مسجّلان لديك بنفس الجرعة.</div>
+    <button class="btn btn-full btn-p" style="margin-top:12px" data-toast="تمت مطابقة الوصفة مع أدويتك" data-close>تم</button>`);
+}
+
+/* ============ الملاحة والربط ============ */
+const TAB_OF = { home: 'home', alerts: 'home', calendar: 'calendar', meds: 'meds', med: 'meds', appt: 'home' };
 function go(name) {
   const [base] = name.split(':');
-  state.screen = name;
-  if (['home', 'calendar', 'meds', 'profile'].includes(base)) state.tab = base;
-  if (base === 'alerts') state.tab = 'home';
-  if (base === 'med') state.tab = 'meds';
-  if (['caregivers', 'insights', 'health', 'settings', 'medicalid', 'safezone', 'assess'].includes(base)) state.tab = 'profile';
-  if (base === 'about' && !['home', 'profile'].includes(state.tab)) state.tab = 'home';
+  state.screen = name; state.tab = TAB_OF[base] || 'profile';
   render();
-  document.querySelectorAll('.panel [data-go]').forEach(b => b.classList.toggle('active', b.dataset.go === base));
+  document.querySelectorAll('.panel [data-go]').forEach(b => b.classList.toggle('active', b.dataset.go === name || b.dataset.go === base));
 }
 function render() {
   const [base, arg] = state.screen.split(':');
   $('#screens').innerHTML = S[base](arg);
   const v = $('#screens .view'); if (v) v.scrollTop = 0;
   bind();
-  /* أشرطة المخزون تمتلئ بحركة */
-  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.querySelectorAll('#screens .bar i').forEach(i => { const w = i.style.width; i.style.width = '0'; requestAnimationFrame(() => requestAnimationFrame(() => { i.style.width = w; })); });
+  document.querySelectorAll('#screens .bar i, #screens .water-wave i').forEach(i => { const w = i.style.width; i.style.width = '0'; requestAnimationFrame(() => requestAnimationFrame(() => { i.style.width = w; })); });
 }
+function on(sel, fn, root = document) { root.querySelectorAll(sel).forEach(el => el.onclick = e => { e.stopPropagation(); fn(el, e); }); }
 function bind() {
-  document.querySelectorAll('#screens [data-go]').forEach(el => el.onclick = e => { e.stopPropagation(); go(el.dataset.go); });
-  document.querySelectorAll('[data-toast]').forEach(el => el.onclick = () => toast(el.dataset.toast));
-  document.querySelectorAll('#screens [data-sw]').forEach(el => el.onclick = () => el.classList.toggle('on'));
-  const onb = $('#onbNext'); if (onb) onb.onclick = () => { if (state.onb < 2) { state.onb++; render(); } else go('login'); };
-  document.querySelectorAll('[data-take]').forEach(b => b.onclick = () => { const m = state.meds.find(x => x.id === b.dataset.take); m.status = 'taken'; m.stock--; toast(`أحسنتِ، سُجّلت جرعة ${m.name} وخُصم قرص من المخزون`); render(); });
-  document.querySelectorAll('[data-snooze]').forEach(b => b.onclick = () => { const m = state.meds.find(x => x.id === b.dataset.snooze); m.time = addMin(m.time, 15); m.snoozed = true; m.status = 'upcoming'; state.meds.sort((a, b) => a.time.localeCompare(b.time)); toast(`تم التأجيل إلى ${t12(m.time)} · سيصل خالد إشعار إن تأخرت أكثر`); render(); });
-  document.querySelectorAll('[data-cup]').forEach(c => c.onclick = () => { state.cups = +c.dataset.cup === state.cups ? state.cups - 1 : +c.dataset.cup; render(); });
-  const fab = $('#fab'); if (fab) fab.onclick = () => { sheet(`<h3 class="text-[19px] font-extrabold mb-3.5">ماذا تودّين إضافته؟</h3><div class="flex gap-3"><div class="opt" id="optMed"><span>💊</span>إضافة دواء</div><div class="opt" id="optAppt"><span>🏥</span>إضافة موعد</div></div>`); bindSheet(); };
-  const am = $('#addMed'); if (am) am.onclick = openAddMed;
-  const rf = $('#refill'); if (rf) rf.onclick = () => { const m = state.meds.find(x => state.screen.endsWith(x.id)); m.stock = m.total; toast('تم تحديث المخزون إلى العبوة الكاملة'); render(); };
-  const inv = $('#invite'); if (inv) inv.onclick = () => { sheet(`<h3 class="text-[19px] font-extrabold">دعوة شريك رعاية</h3><p class="sub mt-1.5 mb-2.5">يمسح قريبك هذا الرمز من تطبيق جرعة، ثم تحدّدين صلاحياته قبل الربط.</p><div class="qr w-[150px] h-[150px] my-2.5 mx-auto rounded-[14px] opacity-85 border-8 border-bg outline outline-1 outline-sep"></div><div class="text-center"><b class="tracking-[4px] text-[22px]">JRH-4K2P</b><div class="sub">ينتهي خلال ١٠ دقائق</div></div><div class="flex gap-2.5 mt-3.5"><button class="btn-p flex-1" data-toast="تم نسخ رابط الدعوة">نسخ الرابط</button><button class="btn-n flex-1" data-toast="مشاركة عبر واتساب">واتساب</button></div>`); bindSheet(); };
-  const sa = $('#suggestAlz'); if (sa) sa.onclick = () => setAlz(true);
-  const aa = $('#aboutAlz'); if (aa) aa.onclick = () => setAlz(true);
-  const sd = $('#setDark'); if (sd) sd.onclick = () => setDark(document.body.dataset.theme !== 'dark');
-  const sz = $('#setAlz'); if (sz) sz.onclick = () => setAlz(!state.alz);
+  on('#screens [data-go]', el => go(el.dataset.go));
+  on('#screens [data-toast]', el => toast(el.dataset.toast, 'info'));
+  on('#screens [data-sw]', el => el.classList.toggle('on'));
+  on('[data-take]', el => { const m = state.meds.find(x => x.id === el.dataset.take); m.status = 'taken'; m.stock--; toast(`أحسنت، سُجّلت جرعة ${m.name} وخُصم قرص من المخزون`); render(); });
+  on('[data-snooze]', el => { const m = state.meds.find(x => x.id === el.dataset.snooze); m.time = addMin(m.time, 15); m.snoozed = true; m.status = 'upcoming'; state.meds.sort((a, b) => a.time.localeCompare(b.time)); toast(`تم التأجيل إلى ${t12(m.time)} · ستصل سارة إشعاراً إن تأخرت أكثر`, 'clock'); render(); });
+  on('#addWater', () => { state.water = Math.min(D.water.goal, state.water + D.water.step); toast(`سُجّل ${D.water.step} مل · ${state.water} من ${D.water.goal} مل`, 'drop'); render(); });
+  on('#closeBanner', () => { state.banner = false; render(); });
+  on('#dismissSuggest', () => { state.suggest = false; render(); });
+  on('#enableSimple, #suggestSimple', () => setSimple(true));
+  on('#fab', openAddChoice);
+  on('#invite', openInvite);
+  on('#importRx', openImport);
+  on('#refill', () => { const m = state.meds.find(x => state.screen.endsWith(x.id)); m.stock = m.total; toast('تم تحديث المخزون إلى العبوة الكاملة', 'box'); render(); });
+  on('[data-cal]', el => { state.calFilter = el.dataset.cal; render(); });
+  on('[data-period]', el => { state.period = el.dataset.period; render(); });
+  on('#setDark', () => setDark(document.body.dataset.theme !== 'dark'));
+  on('#setSimple', () => setSimple(!state.simple));
 }
-function bindSheet() {
-  const sIn = $('#sheetIn');
-  sIn.querySelectorAll('[data-toast]').forEach(el => el.onclick = () => { toast(el.dataset.toast); closeSheet(); });
-  const om = $('#optMed', sIn); if (om) om.onclick = openAddMed;
-  const oa = $('#optAppt', sIn); if (oa) oa.onclick = () => { sheet(`<h3 class="text-[19px] font-extrabold mb-3">إضافة موعد</h3>
-    <div class="card bg-success/15 !border-transparent"><b>✨ وُجدت رسالة من «موعدي»</b><div class="sub my-1 mb-2">مستشفى الملك فهد · عيادة العيون · الثلاثاء ٣ نوفمبر ٩:١٥ ص</div><button class="btn-g !h-10 !text-[14.5px] w-full" data-toast="أُضيف الموعد مع تنبيه قبل يوم وقبل ساعتين">استيراد هذا الموعد</button></div>
-    <div class="field">🏥 <span class="opacity-80">العيادة أو المستشفى</span></div><div class="field">📅 <span class="opacity-80">التاريخ</span></div><div class="field">🕒 <span class="opacity-80">الساعة</span></div><div class="field">🔔 <span class="text-ink">تنبيه قبل يوم وقبل ساعتين</span></div>
-    <button class="btn-p btn-full" data-toast="تم حفظ الموعد">حفظ الموعد</button>`); bindSheet(); };
-  const save = $('#saveMed', sIn); if (save) save.onclick = () => {
-    const name = $('#newName', sIn).value.trim() || 'دواء جديد';
-    const color = $('.shape.on', sIn)?.dataset.c || '#F2F2F2';
-    state.meds.push({ id: 'm' + Date.now(), name, dose: $('#newDose', sIn).value.trim() || 'قرص واحد', form: 'قرص', color, time: $('#newTime', sIn).value || '22:00', note: 'يومياً', status: 'upcoming', stock: 30, total: 30, adherence: 100 });
-    state.meds.sort((a, b) => a.time.localeCompare(b.time));
-    closeSheet(); toast(`أُضيف ${name} وجُدولت تنبيهاته`); go('meds');
-  };
-  sIn.querySelectorAll('.shape').forEach(d => d.onclick = () => { sIn.querySelectorAll('.shape').forEach(x => x.classList.remove('on')); d.classList.add('on'); });
-}
-function openAddMed() {
-  const colors = ['#F2F2F2', '#F2C94C', '#5B9BD5', '#E06464', '#6CBF84', '#F2994A', '#F08BB4'];
-  const inp = 'flex-1 bg-transparent border-0 font-cairo text-ink outline-none';
-  sheet(`<h3 class="text-[19px] font-extrabold mb-3">إضافة دواء</h3>
-    <div class="field">💊 <input id="newName" placeholder="اسم الدواء (مثال: بانادول)" class="${inp}"></div>
-    <div class="field">⚖️ <input id="newDose" placeholder="الجرعة (مثال: ٥٠٠ ملغ)" class="${inp}"></div>
-    <div class="field">🕒 <input id="newTime" type="time" value="22:00" class="${inp}"></div>
-    <div class="sub">شكل ولون الحبة</div><div class="flex gap-2 flex-wrap my-2 mb-3.5">${colors.map((c, i) => `<div data-c="${c}" class="shape ${i === 0 ? 'on' : ''}" style="background:${c}"></div>`).join('')}</div>
-    <div class="sub mb-3">✨ سيتعرّف التطبيق على المادة الفعالة ويحذّر من التفاعلات تلقائياً</div>
-    <button class="btn-g btn-full" id="saveMed">حفظ</button>`);
-  bindSheet();
+function bindModal() {
+  const r = $('#modalIn');
+  on('#mClose, #mClose2', closeModal, r);
+  on('[data-toast]', el => { toast(el.dataset.toast, 'info'); if (el.hasAttribute('data-close')) closeModal(); }, r);
+  on('#optMed', () => openWizard(1), r);
+  on('#optAppt', openAddAppt, r);
+  on('#optSimple', () => { closeModal(); setSimple(true); }, r);
+  const w = state.wiz;
+  if (w) {
+    const save = () => { const n = $('#wName', r); if (n) w.name = n.value.trim(); const c = $('#wConc', r); if (c) w.conc = c.value.trim(); const t = $('#wTime', r); if (t && t.value) w.time = t.value; };
+    on('#wNext', () => { save(); if (w.step === 1 && !w.name) { toast('اكتب اسم الدواء أولاً', 'info'); return; } openWizard(w.step + 1); }, r);
+    on('#wBack', () => { save(); openWizard(w.step - 1); }, r);
+    on('[data-form]', el => { w.form = el.dataset.form; openWizard(2); }, r);
+    on('[data-freq]', el => { w.freq = el.dataset.freq; openWizard(3); }, r);
+    on('[data-meal]', el => { w.meal = el.dataset.meal; openWizard(3); }, r);
+    on('[data-start]', el => { w.start = el.dataset.start; openWizard(4); }, r);
+    on('#wSave', () => {
+      save(); const times = wizTimes(w);
+      times.forEach((t, i) => state.meds.push({ id: 'm' + Date.now() + i, name: w.name, dose: w.conc || 'جرعة واحدة', form: w.form, color: '#E3EEF7', time: t, note: w.meal, status: 'upcoming', stock: 30, total: 30, adherence: 100, active: '—', cls: 'جديد' }));
+      state.meds.sort((a, b) => a.time.localeCompare(b.time));
+      const name = w.name; closeModal(); toast(`أُضيف ${name} وجُدولت ${times.length === 1 ? 'جرعته' : 'جرعاته'}`); go('meds');
+    }, r);
+  }
 }
 
-/* ---------- الأوضاع ---------- */
-function setDark(on) { document.body.dataset.theme = on ? 'dark' : 'light'; $('#swDark').classList.toggle('on', on); if (state.screen === 'settings') render(); }
-function setAlz(on) { state.alz = on; $('#phone').dataset.alz = on ? '1' : '0'; $('#swAlz').classList.toggle('on', on); if (on) { setDark(false); toast('تم تفعيل وضع الرعاية: أزرار أكبر وشاشة أبسط'); } if (state.screen === 'settings' || state.screen === 'insights') go('home'); else render(); }
+/* ============ الأوضاع ============ */
+function setDark(onn) { document.body.dataset.theme = onn ? 'dark' : 'light'; $('#swDark').classList.toggle('on', onn); if (state.screen === 'settings') render(); }
+function setSimple(onn) { state.simple = onn; $('#phone').dataset.simple = onn ? '1' : '0'; $('#swSimple').classList.toggle('on', onn); if (onn) { setDark(false); toast('تم تفعيل الوضع المبسّط: أزرار أكبر وشاشة أبسط', 'brain'); } if (['settings', 'insights'].includes(state.screen)) go('home'); else render(); }
 $('#swDark').onclick = () => setDark(!$('#swDark').classList.contains('on'));
-$('#swAlz').onclick = () => setAlz(!state.alz);
-$('#mAbout').onclick = () => go('about');
+$('#swSimple').onclick = () => setSimple(!state.simple);
 $('#mDark').onclick = () => setDark(document.body.dataset.theme !== 'dark');
-$('#mAlz').onclick = () => setAlz(!state.alz);
-document.querySelectorAll('.panel [data-go]').forEach(b => b.onclick = () => { if (b.dataset.go === 'onboarding') state.onb = 0; go(b.dataset.go); });
-$('#btnNotify').onclick = () => { toast('⏰ حان وقت أتورفاستاتين ٢٠ ملغ · مع الغداء'); if (state.screen !== 'home') go('home'); };
-$('#btnReset').onclick = () => { state.meds = JSON.parse(JSON.stringify(D.medications)); state.cups = D.water.cups; state.onb = 0; setAlz(false); setDark(true); go('about'); toast('أُعيدت البيانات التجريبية'); };
+$('#mSimple').onclick = () => setSimple(!state.simple);
+document.querySelectorAll('.panel [data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
+$('#pWizard').onclick = () => { if (state.tab !== 'home') go('home'); state.wiz = null; openWizard(1); };
+$('#btnNotify').onclick = () => { toast('حان وقت أتورفاستاتين 20 ملغ · مع الغداء', 'bell'); if (state.screen !== 'home') go('home'); };
+$('#btnReset').onclick = () => { const dark = document.body.dataset.theme === 'dark'; state = fresh(); setSimple(false); if (dark) setDark(false); go('home'); toast('أُعيدت البيانات التجريبية', 'refresh'); };
 
-/* الشاشة الافتتاحية: التطبيق والخدمات، ومنها ينتقل الزائر إلى أي شاشة */
-go(state.screen);
+/* رابط مباشر إلى شاشة: demo/#meds أو demo/#appt:a1 */
+const h = decodeURIComponent(location.hash.slice(1)); go(h && S[h.split(':')[0]] ? h : 'home');
 </script>
 </body>
 </html>
