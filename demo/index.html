@@ -228,7 +228,7 @@ svg{display:block;flex:none}
 }
 </style>
 </head>
-<body>
+<body data-theme="dark">
 
 <div class="stage-art" aria-hidden="true">
   <i style="width:520px;height:520px;background:#2D8A6B;top:-160px;right:-120px"></i>
@@ -253,7 +253,7 @@ svg{display:block;flex:none}
   </div>
   <div class="pbox"><b>أوضاع العرض</b>
     <div class="prow"><span>الوضع المبسّط لكبار السن</span><div class="sw" id="swSimple"></div></div>
-    <div class="prow"><span>الوضع الداكن</span><div class="sw" id="swDark"></div></div>
+    <div class="prow"><span>الوضع الداكن</span><div class="sw on" id="swDark"></div></div>
   </div>
   <div class="pbox"><b>اختصارات</b>
     <button class="pbtn" id="btnNotify">محاكاة تنبيه جرعة</button>
@@ -671,7 +671,7 @@ $('#mSimple').onclick = () => setSimple(!state.simple);
 document.querySelectorAll('.panel [data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
 $('#pWizard').onclick = () => { if (state.tab !== 'home') go('home'); state.wiz = null; openWizard(1); };
 $('#btnNotify').onclick = () => { toast('حان وقت أتورفاستاتين 20 ملغ · مع الغداء', 'bell'); if (state.screen !== 'home') go('home'); };
-$('#btnReset').onclick = () => { const dark = document.body.dataset.theme === 'dark'; state = fresh(); setSimple(false); if (dark) setDark(false); go('home'); toast('أُعيدت البيانات التجريبية', 'refresh'); };
+$('#btnReset').onclick = () => { state = fresh(); setSimple(false); setDark(true); go('home'); toast('أُعيدت البيانات التجريبية', 'refresh'); };
 
 /* رابط مباشر إلى شاشة: demo/#meds أو demo/#appt:a1 */
 const h = decodeURIComponent(location.hash.slice(1)); go(h && S[h.split(':')[0]] ? h : 'home');
